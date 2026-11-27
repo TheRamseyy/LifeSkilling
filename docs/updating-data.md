@@ -3,22 +3,20 @@
 Do this after a game patch, once you have extracted the new files to
 `C:\nw\nw-buddy\dist\nw-data\live\`.
 
-## Gathering nodes
+## Rebuild the data
 
-In PowerShell, in this folder:
+In PowerShell, in this folder, run both lines:
+
+```
+python tools/build_data.py C:\nw\nw-buddy\dist\nw-data\live\datatables C:\nw\nw-buddy\dist\nw-data\live\localization\en-us.json data
+```
 
 ```
 python tools/build_gather.py C:\nw\nw-buddy\dist\nw-data\live\datatables C:\nw\nw-buddy\dist\nw-data\live\localization\en-us.json data/gather.json
 ```
 
-It prints how many nodes and items it found.
-
-## Recipes, names and categories
-
-`tools/build_recipes.py` reads the crafting tables, but its output is a longer
-format than the one the site uses. The step that turns it into
-`data/recipes.json`, `data/names.json` and `data/cats.json` is not in `tools/`
-yet. Until it is, ask Claude to rebuild these three files.
+The first makes `recipes.json`, `names.json` and `cats.json`. The second makes
+`gather.json`. Each prints how many things it found.
 
 ## After updating
 
