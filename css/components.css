@@ -93,13 +93,24 @@ fieldset.pick legend{padding:0 6px;font-weight:600}
 .chips input:focus-visible+span{box-shadow:var(--focus)}
 .pick select{width:100%;margin-top:6px}
 
-/* Recipe map (3D constellation) */
-.map{position:relative;height:clamp(300px,42vw,440px);border-radius:var(--r-l);overflow:hidden;background:radial-gradient(closest-side,rgba(92,225,230,.07),transparent),rgba(15,20,38,.5);border:1px solid rgba(61,74,112,.45);cursor:grab;touch-action:pan-y}
-.map:active{cursor:grabbing}
-.map canvas{position:absolute;inset:0;width:100%;height:100%}
-.map .tip{position:absolute;pointer-events:none;padding:5px 10px;border-radius:8px;background:rgba(15,20,38,.92);border:1px solid var(--line2);font-size:.84rem;white-space:nowrap;transform:translate(-50%,calc(-100% - 12px));opacity:0;transition:opacity .15s}
-.map .hint{position:absolute;left:14px;bottom:10px;font-size:.78rem;color:var(--mute);pointer-events:none}
-.map.small{height:280px}
+/* Recipe flow: columns left to right, cards joined by curved lines */
+.flow{position:relative;overflow:auto;border-radius:var(--r-l);background:rgba(15,20,38,.5);border:1px solid rgba(61,74,112,.45);padding:16px;max-height:78vh}
+.fl-in{position:relative}
+.fl-svg{position:absolute;inset:0;overflow:visible}
+.fe{fill:none;stroke-width:1.6;opacity:.38;transition:opacity .2s,stroke-width .2s}
+.fe.k-raw{stroke:var(--moss)}.fe.k-craft{stroke:var(--azoth)}.fe.k-buy,.fe.k-cat{stroke:var(--lilac)}.fe.k-cur{stroke:var(--mute)}
+.fl-col{position:absolute;top:0;font:600 .82rem var(--display);font-stretch:90%;color:var(--mute);text-align:center}
+.fn{position:absolute;display:grid;grid-template-columns:auto 1fr;column-gap:8px;align-items:baseline;height:48px;padding:5px 10px;border-radius:10px;background:var(--slate);border:1px solid var(--line2);border-left:3px solid var(--mute);color:var(--mist);text-decoration:none;overflow:hidden;transition:opacity .2s,border-color .2s,box-shadow .2s}
+.fn b{font:600 .92rem var(--display);font-variant-numeric:tabular-nums}
+.fn .fl-n{font-size:.86rem;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fn small{grid-column:1/3;font-size:.72rem;color:var(--mute);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fn.k-raw{border-left-color:var(--moss)}.fn.k-raw b{color:var(--moss)}
+.fn.k-craft{border-left-color:var(--azoth)}.fn.k-craft b{color:var(--azoth)}
+.fn.k-buy{border-left-color:var(--lilac)}.fn.k-buy b{color:var(--lilac)}
+.fn.k-cat{border-left-color:var(--ember)}.fn.k-cat b{color:var(--ember)}
+.fn:hover,.fn:focus-visible{border-color:var(--azoth);box-shadow:0 0 0 1px var(--azoth),0 6px 20px rgba(5,8,18,.5);z-index:2}
+.flow.hl .fn{opacity:.28}.flow.hl .fn.on{opacity:1}
+.flow.hl .fe{opacity:.07}.flow.hl .fe.on{opacity:.95;stroke-width:2.4}
 
 /* Breakdown tree */
 .legend{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
@@ -145,8 +156,6 @@ fieldset.pick legend{padding:0 6px;font-weight:600}
 .links{display:flex;flex-wrap:wrap;gap:6px}
 .links a{font-size:.87rem;padding:4px 12px;border:1px solid var(--line2);border-radius:999px;text-decoration:none;color:var(--mist);transition:border-color .2s,color .2s}
 .links a:hover{border-color:var(--azoth);color:var(--azoth)}
-.item-top{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:30px;align-items:start}
-@media (max-width:980px){.item-top{grid-template-columns:1fr}}
 
 /* Skill switch */
 .seg{display:flex;gap:4px;flex-wrap:wrap;margin:0 0 34px;padding:4px;border-radius:14px;background:rgba(15,20,38,.6);border:1px solid var(--line);width:fit-content;max-width:100%}

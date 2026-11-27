@@ -31,7 +31,10 @@ function go(){
   App.lastRoute(location.hash.replace(/^#\//,""));
   document.title=(page.title||"")+" · Aeternum Crafting";
   var el=document.createElement("div");
-  function swap(){page.render(el,p.param);main.replaceChildren(el);window.scrollTo(0,0);var h=el.querySelector("h1");if(h&&App.routed){h.tabIndex=-1;h.focus({preventScroll:true})}}
+  function swap(){
+    try{page.render(el,p.param)}
+    catch(e){el.innerHTML='<h1>This page hit a problem</h1><p class="err">'+esc(e.message)+'</p><p>Reload the page. If it keeps happening, the link and this message help find the cause.</p>';setTimeout(function(){throw e})}
+main.replaceChildren(el);window.scrollTo(0,0);var h=el.querySelector("h1");if(h&&App.routed){h.tabIndex=-1;h.focus({preventScroll:true})}}
   function show(){
     if(my!==seq)return;
     // cross-fade between pages where the browser supports it; plain swap otherwise
@@ -40,7 +43,7 @@ function go(){
   }
   if(page.needsData&&!App.data){
     main.innerHTML='<p class="loading">Loading game data…</p>';
-    App.loadData().then(show).catch(function(e){if(my===seq)main.innerHTML='<h1>Could not load data</h1><p class="err">'+esc(e.message)+' did not load. Check your connection and reload the page.</p>'});
+    App.loadData().then(show,function(e){if(my===seq)main.innerHTML='<h1>Could not load data</h1><p class="err">'+esc(e.message)+' did not load. Check your connection and reload the page.</p>'});
   }else show();
 }
 App.go=function(route){location.hash="#/"+route};

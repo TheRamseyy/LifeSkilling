@@ -15,14 +15,17 @@ var HTML=''+
   '<section class="card" aria-labelledby="h-list"><h2 id="h-list">Craft list</h2><div id="list"></div></section>'+
   '<section class="card" id="flexcard" aria-labelledby="h-flex" hidden><h2 id="h-flex">Flexible materials</h2>'+
     '<p class="muted" style="margin:0 0 10px">Some recipes accept any item of a type. Pick the one you will use: it is added to your totals, steps and gathering.</p><div id="flex"></div></section>'+
-'</div><div>'+
-  '<section class="card" id="mapcard" aria-labelledby="h-map"><h2 id="h-map">Recipe map</h2><div id="map"></div><p class="note">Your list in the middle, each ring one step further back, raw materials on the outside. The same breakdown, as text, is in the tree below.</p></section>'+
+'</div><div class="res">'+
+  '<section class="card" id="flowcard" aria-labelledby="h-flow"><h2 id="h-flow">Recipe flow</h2><div id="flow"></div><p class="note">Read it left to right: gather or buy what is on the left, craft each step, and end with what you are making. Hover or tab to a card to see everything it feeds into and everything it needs.</p></section>'+
   '<nav class="jump" aria-label="Results sections"><a href="#rawcard">Materials</a><a href="#gathcard">Gathering</a><a href="#stepcard">Steps</a><a href="#skillcard">Skills</a><a href="#stationcard">Stations</a><a href="#treecard">Tree</a></nav>'+
+  '<div class="res2"><div>'+
   '<section class="card" id="rawcard" aria-labelledby="h-raw"><h2 id="h-raw">Raw materials to gather or buy</h2><div id="raw"></div></section>'+
   '<section class="card" id="gathcard" aria-labelledby="h-gath"><h2 id="h-gath">Gathering skills needed</h2><div id="gath"></div></section>'+
+  '</div><div>'+
   '<section class="card" id="stepcard" aria-labelledby="h-steps"><h2 id="h-steps">Crafting steps (in order)</h2><div id="steps"></div></section>'+
   '<section class="card" id="skillcard" aria-labelledby="h-skills"><h2 id="h-skills">Crafting skills needed</h2><div id="skills"></div></section>'+
   '<section class="card" id="stationcard" aria-labelledby="h-st"><h2 id="h-st">Stations</h2><div id="stations"></div></section>'+
+  '</div></div>'+
   '<section class="card" id="treecard" aria-labelledby="h-tree"><h2 id="h-tree">Breakdown tree <span class="act" id="treeact"><button class="sm" id="expall" type="button">Expand all</button><button class="sm" id="colall" type="button">Collapse all</button></span></h2>'+
     '<div class="legend"><span class="b craft">crafted</span><span class="b raw">gather / raw</span><span class="b buy">bought</span><span class="b cat">chosen "any" item</span><span class="b warn">pick one</span></div><div id="tree"></div></section>'+
 '</div></div>';
@@ -32,10 +35,10 @@ App.page("craft/calculator",{title:"Crafting calculator",needsData:true,render:f
   var $=function(id){return root.querySelector("#"+id)};
   var D=App.data,byOut=D.byOut;
   // jump links scroll inside the page instead of changing the route
-  $("rawcard").parentNode.querySelector(".jump").addEventListener("click",function(e){var a=e.target.closest("a");if(!a)return;e.preventDefault();var t=root.querySelector(a.getAttribute("href"));if(t)t.scrollIntoView()});
+  root.querySelector(".jump").addEventListener("click",function(e){var a=e.target.closest("a");if(!a)return;e.preventDefault();var t=root.querySelector(a.getAttribute("href"));if(t)t.scrollIntoView()});
   S.list=S.list.filter(function(e){return byOut[e.id]||D.N[e.id]});
   $("stat").textContent=fmt(D.craftCount)+" craftable items from "+fmt(D.R.length)+" recipes, read from the game files and not yet checked on Azoth.";
-  var map=App.Constellation($("map"));
+  var flow=App.Flow($("flow"));
 
   function calc(){return NWCalc.expand(S.list,{byOut:byOut,cats:D.C,buy:S.buy,pick:S.pick})}
   function stLabel(s){return NWCalc.stationLabel(s)}
@@ -134,7 +137,7 @@ App.page("craft/calculator",{title:"Crafting calculator",needsData:true,render:f
   function renderTree(c){
     $("tree").innerHTML=c.tree.length?'<ul class="tree">'+c.tree.map(function(n){return treeNode(n,0)}).join("")+'</ul>':'<div class="empty">Nothing to show.</div>';
     $("treeact").hidden=!c.tree.length;
-    $("mapcard").hidden=!c.tree.length;if(c.tree.length)map.set(c.tree);
+    $("flowcard").hidden=!c.tree.length;if(c.tree.length)flow.set(c);
   }
   function render(){
     renderList();
