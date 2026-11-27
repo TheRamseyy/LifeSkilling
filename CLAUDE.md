@@ -5,7 +5,7 @@ Owner: Ramsey (non-coder, Windows PC). Static website hosted on GitHub Pages. No
 ## Goal
 A personal tool, shared with a few friends, that answers: "I want to craft X. What do I need from the very start, where do I get each material, and what skills and gear do I need?" It sits alongside a friend's build planner (PvP/PvE builds), so do not duplicate that. Own data only: everything comes from game files Ramsey extracted himself, never from NW Buddy or nwdb.
 
-## Data (repo top level, all derived from extracted datatables)
+## Data (in /data, all derived from extracted datatables; see data/README.md)
 - recipes.json: array of recipes. Keys: i recipe id, n name, t tradeskill, l skill level, s stations[], o [outputItemId, qty], g ingredients [[type, id, qty]] where type is "i" item, "g" flexible category ("any X"), "$" currency; c craft category, gs gear score, tr tier, p procedural flag, f source table.
 - names.json: id to display name. cats.json: category id to item ids that count.
 - gather.json: n = nodes {gatherableId: [name, skill, requiredLevel, minRespawnSec, maxRespawnSec, gatherTimeSec, distinctItemCount]}; b = item id (lowercase) to gatherable ids that can drop it.
@@ -18,17 +18,47 @@ A personal tool, shared with a few friends, that answers: "I want to craft X. Wh
 - Azoth may differ from the official game. Mark data as "from game files", not verified.
 
 ## Current state
-index.html (repo top level) with assets/calc.js and assets/style.css is a working single-page calculator (search item, quantity, raw materials with "where to get it", crafting steps, requirements, flexible materials, breakdown tree, optional prices). Logic: recursive expansion, crafts = ceil(qty / yield), shared materials summed, cycle and depth guard.
+One app: index.html is the shell; css/, js/core (data loader, router, search, storage), js/pages (one file per page), js/lib/calc.js (calculator logic, no DOM, tested by tests/calc.test.js). Hash routes like #/craft/calculator and #/item/<id>. Calculator: search item, quantity, raw materials with "where to get it", crafting steps, skills by tradeskill, stations grouped, flexible-material picks, collapsible breakdown tree, optional prices. Logic: recursive expansion, crafts = ceil(qty / yield), shared materials summed, cycle and depth guard. Phase 1 is done.
 
 ## First task: redesign the calculator (nothing else yet)
 1. Breakdown tree: much better. Collapsible, shows quantity and number of crafts per node, raw materials visually distinct, easy to scan on a phone. Consider a clear top-down tree with expand/collapse all.
 2. Requirements: group by tradeskill with the level needed, and show stations needed per step.
 3. Stations: show which station each craft happens at, grouped.
 4. Flexible materials ("Any X"): let the user pick which item they will use, show the list nicely, and carry the choice into the totals and gathering info.
-5. Turn it into a small multi-page site with a sidebar or top nav so later pages (gathering gear by level, weapon attributes, gathering-run planner) can be added. Dark, game-like look, readable on mobile, good contrast, keyboard friendly.
+5. Organise it as ONE app with a clear structure, not a pile of separate pages. A grouped side menu (top strip on phones) like a game wiki, with sections by what the user came to do:
+   - Craft: Calculator (this task), Craft list, Prices
+   - Gather: Materials and nodes, Gathering gear by level, Run planner (later)
+   - Gear: Weapons and attributes (later)
+   - Data: About the data, Known limits, Changelog
+   Only Calculator and Data pages are built now; later sections appear as greyed "coming soon" entries so the layout is settled. A global search box finds any craftable item or material and jumps to it. Pages share one header, one data loader and one set of components, and the app remembers the last page and the craft list. Use hash routing (#/craft/calculator) so every page has a shareable link and works on GitHub Pages.
+5b. Organise the repo too:
+   - index.html (shell only)
+   - css/ (tokens, layout, components)
+   - js/ (core: data loader, router, search, storage; pages/: one file per page; lib/: calculator logic with no DOM code so it can be tested)
+   - data/ (all JSON; each file has a short note in data/README.md on how it is built)
+   - tools/ (the Python build scripts)
+   - docs/ (plain-English notes: how to update data, how to add a page, how to deploy)
+   - tests/ (a few Node tests of the calculator logic with real items)
+   - README.md written for a non-coder: what this is, how to update it, how to publish it.
 6. Keep localStorage for the craft list; keep everything working offline from static files.
 
-Later (not now): gathering gear and tradeskill clothing with recommended gear per level band, weapon attributes, a gathering-run planner, and a map test.
+## Roadmap (do in this order, one phase per task; do not start a phase until asked)
+Phase 1 (now): the calculator redesign and organised app above.
+Phase 2: Gathering gear.
+  - Gathering tools and tradeskill clothing for each gathering skill (Mining, Logging, Harvesting, Skinning, Fishing): which items exist, their stats and perks.
+  - Recommended gear for each level band (e.g. level 1 to 50, then further bands), and a "best in slot" per skill. Derive from item definitions and perks in the datatables.
+Phase 3: Gathering run planner.
+  - Given a craft list, the best way to maximise a gathering run: which nodes to target, grouped by skill and level, using respawn time, gather time and which nodes drop several needed materials at once. Show "can drop", never exact amounts or chances (the data has none).
+  - Order materials so one trip covers as many as possible.
+Phase 4: Crafting min-max.
+  - Best way to level crafting skills: what to craft at each level band, cheapest or fastest route, using recipe skill levels and tradeskill XP tables. Include crafting-bonus gear and perks for each tradeskill.
+  - Costs: keep the optional price entry, add total and per-item cost, and cost to buy versus cost to craft. Compare what the friend's vault site includes for crafting costs and match it where useful.
+Phase 5: Weapons and attributes.
+  - Weapon stats, attribute scaling and perks from the weapon and attribute tables, searchable and comparable. Keep it focused on facts from the game files, since the friend's planner already covers PvP and PvE builds.
+Phase 6: Map test.
+  - See whether node spawn coordinates can be pulled from the world files with the NW Buddy tool (nwbt). If it works, add a simple map showing where each material can be found. If it does not, say so plainly and stop.
+
+Reference sites (look at their layout for ideas, never copy their code or text): the friend's vault at https://project-azoth-vault.pages.dev/ (loads in a browser only) and a community vault artifact at https://claude.ai/artifact/GYa3dTxCxnZikjHytK1wHK with a grouped side menu, global search, cards, a paper-doll gear screen and a skill tree.
 
 ## Working rules
 - Test the calculator logic with real items (e.g. Artisan_LongswordT52, DiamondCutT1) after changes.
