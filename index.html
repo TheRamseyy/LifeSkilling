@@ -3,208 +3,66 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Aeternum Crafting &amp; Materials Calculator</title>
-<style>
-:root{--bg:#14110d;--panel:#1e1913;--panel2:#272017;--line:#3a3022;--ink:#efe6d2;--mute:#a39880;--gold:#d9a441;--gold2:#f0c46a;--warn:#e0894a;--r:12px}
-*{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
-.wrap{max-width:780px;margin:0 auto;padding:16px 14px 60px}
-h1{font:600 1.35rem Georgia,"Times New Roman",serif;margin:0;color:var(--gold2);letter-spacing:.02em}
-.sub{color:var(--mute);font-size:.85rem;margin:2px 0 14px}
-.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:14px;margin-bottom:14px}
-.card h2{margin:0 0 10px;font-size:.78rem;text-transform:uppercase;letter-spacing:.09em;color:var(--gold)}
-.row{display:flex;gap:8px;flex-wrap:wrap}
-input{background:var(--panel2);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:10px;font:inherit;min-width:0}
-input:focus{outline:2px solid var(--gold);outline-offset:1px}
-button{font:inherit;cursor:pointer;border-radius:8px;border:1px solid var(--line);background:var(--panel2);color:var(--ink);padding:10px 14px}
-button.sm{padding:4px 9px;font-size:.8rem}
-button:hover{border-color:var(--gold)}
-.grow{flex:1}.q{width:90px}
-.item{display:flex;align-items:center;gap:8px;padding:8px 0;border-top:1px solid var(--line)}
-.item:first-of-type{border-top:0}
-.item .n{flex:1;min-width:0;overflow-wrap:anywhere}
-.c{font-variant-numeric:tabular-nums;color:var(--gold2);font-weight:600}
-.pill{font-size:.7rem;padding:2px 7px;border-radius:99px;border:1px solid var(--line);color:var(--mute);white-space:nowrap}
-.price{width:90px;padding:6px 8px}
-.muted{color:var(--mute);font-size:.85rem}
-.total{display:flex;justify-content:space-between;padding-top:10px;margin-top:6px;border-top:2px solid var(--line);font-weight:600}
-.sugg{margin-top:8px;border:1px solid var(--line);border-radius:8px;overflow:hidden}
-.sugg button{display:flex;justify-content:space-between;gap:8px;width:100%;text-align:left;border:0;border-top:1px solid var(--line);border-radius:0;background:var(--panel2)}
-.sugg button:first-child{border-top:0}
-ul.tree{list-style:none;margin:0;padding-left:16px;border-left:1px dashed var(--line)}
-ul.tree.root{padding-left:0;border:0}
-ul.tree li{padding:3px 0}
-.tq{color:var(--gold2);font-variant-numeric:tabular-nums}.tr{color:var(--mute);font-size:.8rem}
-.empty{color:var(--mute);text-align:center;padding:14px 0}
-details summary{cursor:pointer;color:var(--mute);font-size:.85rem}
-.err{color:var(--warn)}
-.nodes{margin-top:4px}.nodes div{font-size:.8rem;color:var(--mute);padding:2px 0}.nodes b{color:var(--ink);font-weight:500}
-.nogather{font-size:.8rem;color:var(--mute);margin-top:4px}
-</style>
+<meta name="color-scheme" content="dark">
+<title>Crafting Calculator · Aeternum Crafting Tools</title>
+<link rel="stylesheet" href="assets/style.css">
 </head>
 <body>
-<div class="wrap">
-  <h1>Aeternum Crafting &amp; Materials Calculator</h1>
+<a class="skip" href="#main">Skip to calculator</a>
+<header class="top"><div class="in">
+  <a class="brand" href="./">Aeternum Crafting<span>for Project Azoth</span></a>
+  <nav class="main" aria-label="Pages">
+    <a href="./" aria-current="page">Crafting calculator</a>
+    <a href="about.html">About the data</a>
+    <span class="soon" aria-disabled="true">Gathering gear<small>soon</small></span>
+    <span class="soon" aria-disabled="true">Weapon attributes<small>soon</small></span>
+    <span class="soon" aria-disabled="true">Gathering runs<small>soon</small></span>
+  </nav>
+</div></header>
+
+<main class="wrap" id="main">
+  <h1>Crafting calculator</h1>
   <p class="sub" id="stat">Loading recipe data…</p>
 
-  <div class="card">
-    <h2>What do you want to craft?</h2>
-    <div class="row">
-      <input id="target" class="grow" placeholder="Search an item, e.g. Steel Ingot" autocomplete="off">
-      <input id="qty" class="q" type="number" min="1" value="1" inputmode="numeric" aria-label="Quantity">
+  <div class="calc">
+    <div class="side">
+      <section class="card" aria-labelledby="h-search">
+        <h2 id="h-search">What do you want to craft?</h2>
+        <div class="row">
+          <input id="target" class="grow" placeholder="Search an item, e.g. Steel Ingot" autocomplete="off" aria-label="Search an item" aria-controls="sugg">
+          <input id="qty" class="q" type="number" min="1" value="1" inputmode="numeric" aria-label="Quantity">
+        </div>
+        <div id="sugg" class="sugg" hidden></div>
+        <p class="muted" style="margin:8px 0 0">Type 2+ letters. Arrow keys move through results, Enter adds.</p>
+      </section>
+
+      <section class="card" aria-labelledby="h-list"><h2 id="h-list">Craft list</h2><div id="list"></div></section>
+
+      <section class="card" id="flexcard" aria-labelledby="h-flex" hidden>
+        <h2 id="h-flex">Flexible materials</h2>
+        <p class="muted" style="margin:0 0 10px">Some recipes accept any item of a type. Pick the one you will use: it is added to your totals, steps and gathering.</p>
+        <div id="flex"></div>
+      </section>
     </div>
-    <div id="sugg" class="sugg" hidden></div>
+
+    <div>
+      <nav class="jump" aria-label="Results sections">
+        <a href="#rawcard">Materials</a><a href="#gathcard">Gathering</a><a href="#stepcard">Steps</a><a href="#skillcard">Skills</a><a href="#stationcard">Stations</a><a href="#treecard">Tree</a>
+      </nav>
+      <section class="card" id="rawcard" aria-labelledby="h-raw"><h2 id="h-raw">Raw materials to gather or buy</h2><div id="raw"></div></section>
+      <section class="card" id="gathcard" aria-labelledby="h-gath"><h2 id="h-gath">Gathering skills needed</h2><div id="gath"></div></section>
+      <section class="card" id="stepcard" aria-labelledby="h-steps"><h2 id="h-steps">Crafting steps (in order)</h2><div id="steps"></div></section>
+      <section class="card" id="skillcard" aria-labelledby="h-skills"><h2 id="h-skills">Crafting skills needed</h2><div id="skills"></div></section>
+      <section class="card" id="stationcard" aria-labelledby="h-st"><h2 id="h-st">Stations</h2><div id="stations"></div></section>
+      <section class="card" id="treecard" aria-labelledby="h-tree">
+        <h2 id="h-tree">Breakdown tree <span class="act" id="treeact"><button class="sm" id="expall" type="button">Expand all</button><button class="sm" id="colall" type="button">Collapse all</button></span></h2>
+        <div class="legend"><span class="b craft">crafted</span><span class="b raw">gather / raw</span><span class="b buy">bought</span><span class="b cat">chosen "any" item</span><span class="b warn">pick one</span></div>
+        <div id="tree"></div>
+      </section>
+    </div>
   </div>
-
-  <div class="card"><h2>Craft list</h2><div id="list"></div></div>
-  <div class="card"><h2>Raw materials to gather</h2><div id="raw"></div></div>
-  <div class="card" id="gathcard" hidden><h2>Gathering skills needed</h2><div id="gath"></div></div>
-  <div class="card" id="catcard" hidden><h2>Flexible materials (pick any)</h2><div id="cats"></div></div>
-  <div class="card"><h2>Crafting steps (in order)</h2><div id="steps"></div></div>
-  <div class="card"><h2>Requirements</h2><div id="reqs"></div></div>
-  <div class="card"><h2>Breakdown tree</h2><div id="tree"></div></div>
-  <p class="muted">Data read from the New World game files. Gathering shows which nodes can drop each material, not exact amounts or chances. Map locations are not included. Where several recipes make the same item, the standard (non-procedural) one is used.</p>
-</div>
-
-<script>
-(function(){
-"use strict";
-var $=function(id){return document.getElementById(id)};
-var R=[],N={},C={},byOut={},outs=[],GN={},GB={};
-var KEY="nwcalc.v2",state={list:[],buy:{},prices:{}};
-var RANK=["weapon","armorer","engineer","jeweler","arcana","cooking","refining","misc","specialtyshops","raid","dungeon","gypkilm","seasons","seasonalserver"];
-function esc(s){return String(s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
-function fmt(n){return n.toLocaleString("en-GB")}
-function nm(id){return N[id]||String(id).replace(/_/g,' ').replace(/([a-z])([A-Z0-9])/g,'$1 $2')}
-function load(){try{var d=JSON.parse(localStorage.getItem(KEY)||"null");if(d){state.list=d.list||[];state.buy=d.buy||{};state.prices=d.prices||{}}}catch(e){}}
-function save(){try{localStorage.setItem(KEY,JSON.stringify(state))}catch(e){}}
-
-function dur(s,nu){if(s<90)return Math.round(s)+(nu?"":" s");var m=s/60;return (m<10?Math.round(m*10)/10:Math.round(m))+(nu?"":" min")}
-function nodesFor(id){
-  var l=(GB[String(id).toLowerCase()]||[]).map(function(g){return {g:g,v:GN[g]}}).filter(function(x){return x.v});
-  l.sort(function(a,b){return a.v[2]-b.v[2]||a.v[6]-b.v[6]||a.v[0].localeCompare(b.v[0])});
-  var seen={},out=[];l.forEach(function(x){var k=x.v[0]+"|"+x.v[1];if(!seen[k]){seen[k]=1;out.push(x)}});
-  return out;
-}
-function rank(r){var i=RANK.indexOf(r.f);return (r.p?100:0)+(i<0?50:i)}
-function pick(id){var l=byOut[id];return l?l[0]:null}
-
-function calc(){
-  var raw={},cur={},cat={},crafts={},order=[],reqs={},stations={},tree=[];
-  function visit(id,qty,depth,path){
-    var r=pick(id),node={id:id,qty:qty,kids:[],raw:true};
-    if(r&&!state.buy[id]&&path.indexOf(id)<0&&depth<25){
-      var times=Math.ceil(qty/r.o[1]);node.raw=false;node.times=times;
-      r.g.forEach(function(g){
-        var q=g[2]*times;
-        if(g[0]==="i")node.kids.push(visit(g[1],q,depth+1,path.concat(id)));
-        else if(g[0]==="g"){cat[g[1]]=(cat[g[1]]||0)+q;node.kids.push({id:g[1],qty:q,kids:[],cat:true})}
-        else{cur[g[1]]=(cur[g[1]]||0)+q;node.kids.push({id:g[1],qty:q,kids:[],raw:true})}
-      });
-      if(!crafts[id]){crafts[id]={times:0,depth:depth,r:r};order.push(id)}
-      crafts[id].times+=times;crafts[id].depth=Math.max(crafts[id].depth,depth);
-      if(r.t){reqs[r.t]=Math.max(reqs[r.t]||0,r.l||0)}
-      (r.s||[]).forEach(function(s){stations[s]=1});
-    }else{raw[id]=(raw[id]||0)+qty}
-    return node;
-  }
-  state.list.forEach(function(e){tree.push(visit(e.id,e.qty,0,[]))});
-  order.sort(function(a,b){return crafts[b].depth-crafts[a].depth});
-  return {raw:raw,cur:cur,cat:cat,crafts:crafts,order:order,reqs:reqs,stations:stations,tree:tree};
-}
-
-function render(){
-  var h="";
-  state.list.forEach(function(e,i){
-    h+='<div class="item"><span class="n">'+esc(nm(e.id))+'</span><input class="q" type="number" min="1" value="'+e.qty+'" data-q="'+i+'" aria-label="Quantity of '+esc(nm(e.id))+'"><button class="sm" data-rm="'+i+'" aria-label="Remove">✕</button></div>';
-  });
-  $("list").innerHTML=h||'<div class="empty">Nothing yet. Search an item above.</div>';
-  var c=calc(),names=Object.keys(c.raw).sort(function(a,b){return nm(a).localeCompare(nm(b))}),t=0,pr=0;
-  h="";
-  names.forEach(function(id){
-    var p=state.prices[id],cost=(p!=null&&p!=="")?p*c.raw[id]:null;if(cost!=null){t+=cost;pr++}
-    var gl=byOut[id]?[]:nodesFor(id),gh="";
-    if(!byOut[id]){
-      if(gl.length)gh='<details class="nodes"><summary>Where to get it ('+gl.length+')</summary>'+gl.slice(0,8).map(function(x){var v=x.v;return '<div><b>'+esc(v[0])+'</b> · '+esc(v[1])+(v[2]?' lvl '+v[2]:'')+' · respawn '+dur(v[3],1)+'–'+dur(v[4])+' · gather '+dur(v[5])+'</div>'}).join("")+(gl.length>8?'<div>+'+(gl.length-8)+' more</div>':"")+'</details>';
-      else gh='<div class="nogather">No gathering node found. Likely a creature drop, chest, vendor, salvage or event item.</div>';
-    }
-    h+='<div class="item"><span class="n">'+esc(nm(id))+(byOut[id]?' <span class="pill">bought</span>':'')+gh+'</span><span class="c">'+fmt(c.raw[id])+'</span><input class="price" type="number" min="0" step="any" placeholder="price ea." value="'+(p!=null?p:"")+'" data-p="'+esc(id)+'" aria-label="Price of '+esc(nm(id))+'">'+(byOut[id]?'<button class="sm" data-craft="'+esc(id)+'">Craft</button>':'')+'</div>';
-  });
-  Object.keys(c.cur).forEach(function(id){h+='<div class="item"><span class="n">'+esc(nm(id))+'</span><span class="c">'+fmt(c.cur[id])+'</span></div>'});
-  if(names.length)h+='<div class="total"><span>Total cost'+(pr<names.length?' <span class="muted">('+pr+' of '+names.length+' priced)</span>':'')+'</span><span id="tot">'+fmt(Math.round(t*100)/100)+'</span></div>';
-  $("raw").innerHTML=h||'<div class="empty">Add something to craft to see materials.</div>';
-
-  var sk={},sn={};
-  names.forEach(function(id){if(byOut[id])return;var gl=nodesFor(id);if(!gl.length)return;var best=gl[0];
-    var k=best.v[1];if(!sk[k])sk[k]=0;sk[k]=Math.max(sk[k],best.v[2]);(sn[k]=sn[k]||[]).push(nm(id))});
-  h="";Object.keys(sk).sort().forEach(function(k){h+='<div class="item"><span class="n">'+esc(k)+'<div class="muted">'+sn[k].map(esc).join(", ")+'</div></span><span class="c">level '+sk[k]+'</span></div>'});
-  $("gathcard").hidden=!h;$("gath").innerHTML=h+(h?'<div class="muted" style="margin-top:6px">Level is the lowest needed to reach every material listed, using the easiest node for each.</div>':"");
-
-  var ck=Object.keys(c.cat);$("catcard").hidden=!ck.length;h="";
-  ck.sort(function(a,b){return nm(a).localeCompare(nm(b))}).forEach(function(id){
-    var opts=(C[id]||[]).slice(0,40).map(function(x){return esc(nm(x))}).join(", ");
-    h+='<div class="item"><span class="n">Any '+esc(nm(id))+(opts?'<details><summary>Which items count?</summary><div class="muted">'+opts+'</div></details>':'')+'</span><span class="c">'+fmt(c.cat[id])+'</span></div>';
-  });
-  $("cats").innerHTML=h;
-
-  h="";
-  c.order.forEach(function(id,i){
-    var x=c.crafts[id],r=x.r;
-    h+='<div class="item"><span class="pill">'+(i+1)+'</span><span class="n">'+esc(nm(id))+'<div class="muted">'+r.g.map(function(g){return g[2]+" "+esc(nm(g[1]))}).join(" + ")+(r.o[1]>1?" → "+r.o[1]+" each":"")+'</div></span><span class="c">×'+fmt(x.times)+'</span><button class="sm" data-buy="'+esc(id)+'" title="Treat as bought">Buy</button></div>';
-  });
-  $("steps").innerHTML=h||'<div class="empty">No crafting steps yet.</div>';
-
-  h="";
-  Object.keys(c.reqs).sort().forEach(function(k){h+='<div class="item"><span class="n">'+esc(k)+'</span><span class="c">level '+c.reqs[k]+'</span></div>'});
-  var st=Object.keys(c.stations).sort();
-  if(st.length)h+='<div class="item"><span class="n">Stations</span><span class="muted">'+st.map(esc).join(", ")+'</span></div>';
-  $("reqs").innerHTML=h||'<div class="empty">Nothing yet.</div>';
-
-  function tr(nodes,root){return '<ul class="tree'+(root?" root":"")+'">'+nodes.map(function(n){
-    return '<li><span class="tq">'+fmt(n.qty)+'×</span> '+esc(nm(n.id))+(n.cat?' <span class="tr">any</span>':n.raw?' <span class="tr">raw</span>':' <span class="tr">craft '+n.times+'×</span>')+(n.kids.length?tr(n.kids,false):"")+'</li>'}).join("")+'</ul>'}
-  $("tree").innerHTML=c.tree.length?tr(c.tree,true):'<div class="empty">Nothing to show.</div>';
-}
-function totalOnly(){
-  var c=calc(),t=0;Object.keys(c.raw).forEach(function(id){var p=state.prices[id];if(p!=null&&p!=="")t+=p*c.raw[id]});
-  var e=$("tot");if(e)e.textContent=fmt(Math.round(t*100)/100);
-}
-
-function add(id){
-  var q=Math.max(1,parseInt($("qty").value,10)||1),ex=state.list.filter(function(e){return e.id===id})[0];
-  if(ex)ex.qty+=q;else state.list.push({id:id,qty:q});
-  $("target").value="";$("sugg").hidden=true;$("qty").value=1;save();render();
-}
-$("target").addEventListener("input",function(){
-  var q=this.value.trim().toLowerCase(),s=$("sugg");
-  if(q.length<2){s.hidden=true;return}
-  var m=[];
-  for(var i=0;i<outs.length&&m.length<25;i++){if(outs[i].l.indexOf(q)>=0)m.push(outs[i])}
-  m.sort(function(a,b){var as=a.l.indexOf(q)===0?0:1,bs=b.l.indexOf(q)===0?0:1;return as-bs||a.n.length-b.n.length});
-  s.innerHTML=m.map(function(o){return '<button data-add="'+esc(o.id)+'"><span>'+esc(o.n)+'</span><span class="muted">'+esc(o.meta)+'</span></button>'}).join("")||'<div class="empty">No match.</div>';
-  s.hidden=false;
-});
-$("sugg").addEventListener("click",function(e){var b=e.target.closest("[data-add]");if(b)add(b.dataset.add)});
-$("list").addEventListener("click",function(e){var b=e.target.closest("[data-rm]");if(!b)return;state.list.splice(+b.dataset.rm,1);save();render()});
-$("list").addEventListener("change",function(e){var i=e.target.dataset.q;if(i==null)return;state.list[+i].qty=Math.max(1,parseInt(e.target.value,10)||1);save();render()});
-$("raw").addEventListener("input",function(e){var id=e.target.dataset.p;if(id==null)return;if(e.target.value==="")delete state.prices[id];else state.prices[id]=parseFloat(e.target.value)||0;save();totalOnly()});
-$("raw").addEventListener("click",function(e){var b=e.target.closest("[data-craft]");if(!b)return;delete state.buy[b.dataset.craft];save();render()});
-$("steps").addEventListener("click",function(e){var b=e.target.closest("[data-buy]");if(!b)return;state.buy[b.dataset.buy]=1;save();render()});
-
-function init(data){
-  R=data[0];N=data[1];C=data[2];
-  R.forEach(function(r){if(r.o[0]){(byOut[r.o[0]]=byOut[r.o[0]]||[]).push(r)}});
-  Object.keys(byOut).forEach(function(id){
-    byOut[id].sort(function(a,b){return rank(a)-rank(b)});
-    var r=byOut[id][0],n=nm(id);
-    outs.push({id:id,n:n,l:n.toLowerCase(),meta:[r.t,r.tr?"T"+r.tr:"",r.gs?"GS "+r.gs:""].filter(Boolean).join(" · ")});
-  });
-  $("stat").textContent=fmt(R.length)+" recipes · "+fmt(outs.length)+" craftable items · from game files";
-  load();state.list=state.list.filter(function(e){return byOut[e.id]||N[e.id]});render();
-}
-Promise.all(["recipes.json","names.json","cats.json"].map(function(f){return fetch(f).then(function(r){if(!r.ok)throw new Error(f);return r.json()})}))
- .then(function(d){return fetch("gather.json").then(function(r){return r.ok?r.json():null}).catch(function(){return null}).then(function(g){if(g){GN=g.n;GB=g.b}return d})})
- .then(init).catch(function(e){$("stat").innerHTML='<span class="err">Could not load data ('+esc(e.message)+').</span>'});
-})();
-</script>
+</main>
+<footer class="foot">Data read from game files and not verified on Azoth. Gathering shows which nodes can drop each material, not amounts or chances. <a href="about.html">More about the data</a>.</footer>
+<script src="assets/calc.js"></script>
 </body>
 </html>

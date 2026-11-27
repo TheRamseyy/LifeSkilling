@@ -18,7 +18,7 @@ A personal tool, shared with a few friends, that answers: "I want to craft X. Wh
 - Azoth may differ from the official game. Mark data as "from game files", not verified.
 
 ## Current state
-index.html (repo top level) is a working single-page calculator (search item, quantity, raw materials with "where to get it", crafting steps, requirements, flexible materials, breakdown tree, optional prices). Logic: recursive expansion, crafts = ceil(qty / yield), shared materials summed, cycle and depth guard.
+index.html (repo top level) with assets/calc.js and assets/style.css is a working single-page calculator (search item, quantity, raw materials with "where to get it", crafting steps, requirements, flexible materials, breakdown tree, optional prices). Logic: recursive expansion, crafts = ceil(qty / yield), shared materials summed, cycle and depth guard.
 
 ## First task: redesign the calculator (nothing else yet)
 1. Breakdown tree: much better. Collapsible, shows quantity and number of crafts per node, raw materials visually distinct, easy to scan on a phone. Consider a clear top-down tree with expand/collapse all.
