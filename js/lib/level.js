@@ -16,6 +16,10 @@ var REAGENT=/^(Flux|Sandpaper|Tannin|Solvent|Weave)T\d/;
          skill, from, to, mode: "fast"|"cheap", prices: {itemId: price}, pick: {catId: itemId},
          bonus: extra XP as a fraction, e.g. 1 for double XP (optional)}
    Returns {steps:[{from,to,r,crafts,xp,raw,units,cost}], total:{crafts,xp,raw,units,cost,fee}} */
+/* XP for one craft: the recipe's base XP times the number of ingredients it uses.
+   The base XP is from the game files; the multiplying matches published levelling guides exactly
+   (gaming.tools: Ethereal Dust 11, Gold Ingot 46 x 8 = 368, Iron Ice Gauntlet 18 x 23 = 414). */
+function xpEach(r){return r.x*r.g.reduce(function(s,g){return s+(g[0]==="$"?0:g[2])},0)}
 function route(opt){
   var from=Math.max(0,opt.from|0),to=Math.min(opt.xp.length,opt.to|0),cache={};
   // refining reagents (flux, sandpaper, tannin, solvent, weave) are bought from vendors or players, so they are allowed
@@ -26,7 +30,7 @@ function route(opt){
   var pick={};Object.keys(opt.cats).forEach(function(k){var mem=opt.cats[k],p=opt.pick&&opt.pick[k];pick[k]=p&&mem.indexOf(p)>=0?p:mem[0]});
   var cands=opt.recipes.filter(function(r){
     return r.t===opt.skill&&r.x>0&&r.k&&r.o[0]&&!SKIP[r.f]&&r.g.length&&!r.g.some(function(g){return g[0]==="$"})
-      &&r.c!=="Salvage"&&!LIMITED.test(r.n);
+      &&r.c!=="Salvage"&&r.c!=="NamedCrafting"&&!LIMITED.test(r.n);// named items need rare drops (Fae Iron, Azurite...)
   });
   // raw materials for one craft of r; any-X ingredients use your pick, else the first (standard) item in the list
   function one(r){
@@ -53,8 +57,9 @@ function route(opt){
   }
   function score(r){
     var o=one(r);
-    if(opt.mode==="cheap")return o.cost!=null?o.cost/r.x:1e9+o.units/r.x;// priced recipes first, then fewest raw materials
-    return -r.x+o.units/r.x/1e6;// most XP per craft; ties go to fewer materials
+    var x=xpEach(r);
+    if(opt.mode==="cheap")return o.cost!=null?o.cost/x:1e9+o.units/x;// priced recipes first, then fewest raw materials
+    return -x+o.units/x/1e6;// most XP per craft; ties go to fewer materials
   }
   var steps=[];
   for(var a=from;a<to;a=b){
@@ -62,7 +67,7 @@ function route(opt){
     for(var n=a;n<b;n++)need+=opt.xp[n]||0;
     var pool=cands.filter(function(r){return (r.l||0)<=a&&one(r).ok});
     // cheapest still has to be sensible: only recipes worth at least a quarter of the best XP on offer
-    if(opt.mode==="cheap"&&pool.length){var top=Math.max.apply(null,pool.map(function(r){return r.x}));pool=pool.filter(function(r){return r.x>=top*MINSHARE})}
+    if(opt.mode==="cheap"&&pool.length){var top=Math.max.apply(null,pool.map(xpEach));pool=pool.filter(function(r){return xpEach(r)>=top*MINSHARE})}
     if(!pool.length){steps.push({from:a,to:b,r:null,xp:need});continue}
     var r=pool.sort(function(x,y){return score(x)-score(y)||x.n.localeCompare(y.n)})[0];
     var last=steps[steps.length-1];
@@ -74,7 +79,8 @@ function route(opt){
     total.xp+=s.xp;
     if(!s.r)return;
     var o=one(s.r);
-    s.crafts=Math.ceil(s.xp/(s.r.x*mult));
+    s.each=xpEach(s.r);
+    s.crafts=Math.ceil(s.xp/(s.each*mult));
     s.raw={};Object.keys(o.raw).forEach(function(id){s.raw[id]=o.raw[id]*s.crafts;total.raw[id]=(total.raw[id]||0)+s.raw[id]});
     s.units=o.units*s.crafts;s.cost=o.cost==null?null:o.cost*s.crafts;
     total.crafts+=s.crafts;total.units+=s.units;total.fee+=(s.r.fee||0)*s.crafts;
@@ -83,6 +89,6 @@ function route(opt){
   return {steps:steps,total:total};
 }
 
-var api={route:route,STEP:STEP};
+var api={route:route,xpEach:xpEach,STEP:STEP};
 if(typeof module!=="undefined"&&module.exports)module.exports=api;else root.NWLevel=api;
 })(this);

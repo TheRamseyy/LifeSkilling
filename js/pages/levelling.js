@@ -66,11 +66,11 @@ function html(skill,st,G){
     if(!s.r){h+='<div class="st-h"><b>Level '+s.from+' to '+s.to+'</b></div><p class="muted">No standard recipe in the files for this stage uses materials you can gather or buy. Craft anything you have unlocked; '+fmt(Math.round(s.xp))+' XP needed.</p></div></li>';return}
     var stn=(s.r.s||[])[0],out=s.r.o[1]*s.crafts;
     h+='<div class="st-h"><b>Level '+s.from+' to '+s.to+': '+App.itemLink(s.r.o[0],s.r.n)+'</b><span class="b plain">needs '+esc(skill)+' '+(s.r.l||0)+'</span>'+(stn?'<span class="b craft">'+esc(NWCalc.stationLabel(stn))+'</span>':'')+'</div>'+
-      '<p><b class="big2">'+fmt(s.crafts)+' crafts</b> <span class="muted">at '+fmt(s.r.x)+' XP each, '+fmt(Math.round(s.xp))+' XP in total'+(s.r.fee?', '+fmt(s.r.fee*s.crafts)+' coin in fees':'')+'</span></p>'+
+      '<p><b class="big2">'+fmt(s.crafts)+' crafts</b> <span class="muted">at '+fmt(Math.round(s.each))+' XP each, '+fmt(Math.round(s.xp))+' XP in total'+(s.r.fee?', '+fmt(s.r.fee*s.crafts)+' coin in fees':'')+'</span></p>'+
       '<div class="mats">'+Object.keys(s.raw).sort(function(a,b){return s.raw[b]-s.raw[a]}).map(function(id){return '<a class="mat" href="#/item/'+encodeURIComponent(id)+'">'+esc(nm(id))+' <b>×'+fmt(s.raw[id])+'</b></a>'}).join("")+'</div>'+
       '<p><button class="sm" type="button" data-add="'+esc(s.r.o[0])+'" data-qty="'+out+'">Add '+fmt(out)+' to craft list</button></p></div></li>';
   });
-  h+='</ol><p class="note">XP per craft and XP per level are from the game files. XP boosts from territory standing, events or anything else are not counted'+App.unsure("Crafts needed assume the base XP per craft. Any XP boost you have would lower the number.")+', so you may need fewer crafts. "Any" ingredients use your choice from the calculator, or the standard item. Refining reagents (flux, sandpaper, tannin, solvent) are counted as bought.</p></section>';
+  h+='</ol><p class="note">XP per craft is the recipe’s base XP from the game files times the number of ingredients it uses; this matches the published <a href="https://gaming.tools/newworld/guides/smelting" rel="noopener" target="_blank">gaming.tools</a> levelling guides exactly. XP per level is from the game files. XP boosts from territory standing, events or anything else are not counted'+App.unsure("Crafts needed assume the base XP per craft. Any XP boost you have would lower the number.")+', so you may need fewer crafts. "Any" ingredients use your choice from the calculator, or the standard item. Refining reagents (flux, sandpaper, tannin, solvent) are counted as bought.</p></section>';
 
   // Shopping list
   var ids=Object.keys(t.raw).sort(function(a,b){return t.raw[b]-t.raw[a]});

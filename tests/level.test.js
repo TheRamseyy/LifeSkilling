@@ -24,26 +24,26 @@ test("crafts give enough XP for each stage", () => {
     let need = 0;
     for (let n = s.from; n < s.to; n++) need += xp[n];
     assert.strictEqual(s.xp, need);
-    assert.ok(s.crafts * s.r.x >= need && (s.crafts - 1) * s.r.x < need, s.r.n);
+    assert.ok(s.crafts * s.each >= need && (s.crafts - 1) * s.each < need, s.r.n);
   }
 });
 
-test("smelting starts on Charcoal and moves to a 46 XP ingot at 50", () => {
-  const r = L.route(opt("Smelting", "fast"));
-  assert.strictEqual(r.steps[0].r.i, "CharcoalT1");
-  assert.strictEqual(r.steps[1].from, 50);
-  assert.strictEqual(r.steps[1].r.x, 46);
+test("smelting at 50 to 75 matches the gaming.tools guide: 162 Gold Ingots", () => {
+  const r = L.route(opt("Smelting", "fast", { from: 50, to: 75 }));
+  assert.strictEqual(r.steps[0].r.n, "Gold Ingot");
+  assert.strictEqual(r.steps[0].crafts, 162);
 });
 
 test("wood inside Charcoal is counted, with or without a chosen wood", () => {
-  const a = L.route(opt("Smelting", "fast", { from: 0, to: 10 })), b = L.route(opt("Smelting", "fast", { from: 0, to: 10, pick: { Wood: "WoodT1" } }));
+  const only = (o) => Object.assign(opt("Smelting", "fast", o), { recipes: recipes.filter((r) => r.i === "CharcoalT1") });
+  const a = L.route(only({ from: 0, to: 10 })), b = L.route(only({ from: 0, to: 10, pick: { Wood: "WoodT1" } }));
   assert.ok(a.steps[0].raw.WoodT1 > 0);
   assert.deepStrictEqual(a.steps[0].raw, b.steps[0].raw);
 });
 
 test("refining reagents are treated as bought, not broken down", () => {
-  const r = L.route(opt("Smelting", "fast"));
-  const ingot = r.steps[1];
+  const r = L.route(opt("Smelting", "fast", { from: 50, to: 75 }));
+  const ingot = r.steps[0];
   assert.ok(ingot.raw.FluxT5 > 0);
   assert.strictEqual(ingot.raw.ReagentConverterT5, undefined);
 });
@@ -64,4 +64,10 @@ test("an XP bonus cuts the crafts needed", () => {
   assert.ok(dbl.total.crafts <= Math.ceil(base.total.crafts / 2) + dbl.steps.length);
   assert.ok(dbl.total.crafts >= Math.floor(base.total.crafts / 2));
   assert.strictEqual(dbl.total.xp, base.total.xp, "XP needed does not change");
+});
+
+test("XP per craft is base XP times ingredients (matches gaming.tools guides)", () => {
+  const R = recipes, find = (n) => R.find((r) => r.n === n && r.k);
+  assert.strictEqual(L.xpEach(find("Iron Ice Gauntlet")), 414);
+  assert.strictEqual(L.xpEach(find("Gold Ingot")), 368);
 });
