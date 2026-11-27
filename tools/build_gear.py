@@ -25,7 +25,7 @@ SKILLS = {  # skill -> tool class in ItemClass
 # (cosmetic skins, store items, test items, retired items, replacements).
 SOURCE = {"crafting": "Crafted", "loot": "Drop", "named": "Named drop", "quest": "Quest reward",
           "faction": "Faction shop", "omega": "Event", "seasonalserver": "Seasonal server",
-          "seasons": "Season reward", "common": "Other", "conquerorsitems": "Conqueror shop"}
+          "seasons": "Season reward", "common": "Not craftable", "conquerorsitems": "Conqueror shop"}
 SLOTS = [("EquippableHead", "Head"), ("EquippableChest", "Chest"), ("EquippableHands", "Hands"),
          ("EquippableLegs", "Legs"), ("EquippableFeet", "Feet"), ("EquippableAmulet", "Amulet"),
          ("EquippableRing", "Ring"), ("EquippableToken", "Earring")]
@@ -141,7 +141,8 @@ for iid, (src, r) in items.items():
         continue
     gs = gear_score(r)
     source = "Crafted" if iid.lower() in crafted else SOURCE[src]
-    base = {"id": iid, "n": name, "tr": r.get("Tier") or 0, "gs": gs, "lv": r.get("RequiredLevel") or 0, "src": source}
+    base = {"id": iid, "n": name, "tr": r.get("Tier") or 0, "gs": gs, "lv": r.get("RequiredLevel") or 0, "src": source,
+            "bop": 1 if r.get("BindOnPickup") else 0}
     if "EquippableTool" in cls:
         skill = next((s for s, c in SKILLS.items() if c in cls), None)
         st = stats.get(r.get("ItemStatsRef") or "")
