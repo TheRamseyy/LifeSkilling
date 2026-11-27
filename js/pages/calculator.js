@@ -127,7 +127,7 @@ App.page("craft/calculator",{title:"Crafting calculator",needsData:true,render:f
       var x=g[k];
       h+='<section class="grp"><header>'+esc(x.name)+(x.tier?'<span class="c">tier '+x.tier+'+</span>':'')+'</header><ul>'+x.l.map(function(e){return '<li><span class="n">'+App.itemLink(e.id)+'</span><span class="c">×'+fmt(c.crafts[e.id].times)+'</span>'+(e.tier?'<span class="muted">T'+e.tier+'</span>':'')+(e.alt.length?'<span class="muted">or '+e.alt.map(function(s){return esc(stLabel(s))}).join(", ")+'</span>':'')+'</li>'}).join("")+'</ul></section>';
     });
-    $("stations").innerHTML=h?'<div class="grps">'+h+'</div><p class="note">Crafts listed in the order of the steps. "T2" means a tier 2 station or better.</p>':'<div class="empty">Nothing yet.</div>';
+    $("stations").innerHTML=h?'<div class="grps">'+h+'</div><p class="note">Crafts listed in the order of the steps. "T2" means a tier 2 station or better.'+App.unsure("Read from the station number in the recipe data. A few rare station names are best guesses.")+'</p>':'<div class="empty">Nothing yet.</div>';
   }
   function treeNode(n,depth){
     var label='<span class="tq">'+fmt(n.qty)+'×</span><span class="nm">'+esc(n.kind==="cat"?"Any "+nm(n.id):nm(n.id))+(n.via?' <span class="via">for any '+esc(nm(n.via))+'</span>':'')+'</span>';

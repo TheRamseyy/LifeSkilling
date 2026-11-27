@@ -60,7 +60,7 @@ function html(skill,st,G){
       '<div class="mats">'+Object.keys(s.raw).sort(function(a,b){return s.raw[b]-s.raw[a]}).map(function(id){return '<a class="mat" href="#/item/'+encodeURIComponent(id)+'">'+esc(nm(id))+' <b>×'+fmt(s.raw[id])+'</b></a>'}).join("")+'</div>'+
       '<p><button class="sm" type="button" data-add="'+esc(s.r.o[0])+'" data-qty="'+out+'">Add '+fmt(out)+' to craft list</button></p></div></li>';
   });
-  h+='</ol><p class="note">XP per craft and XP per level are from the game files. XP boosts from territory standing, events or anything else are not counted, so you may need fewer crafts. "Any" ingredients use your choice from the calculator, or the standard item. Refining reagents (flux, sandpaper, tannin, solvent) are counted as bought.</p></section>';
+  h+='</ol><p class="note">XP per craft and XP per level are from the game files. XP boosts from territory standing, events or anything else are not counted'+App.unsure("Crafts needed assume the base XP per craft. Any XP boost you have would lower the number.")+', so you may need fewer crafts. "Any" ingredients use your choice from the calculator, or the standard item. Refining reagents (flux, sandpaper, tannin, solvent) are counted as bought.</p></section>';
 
   // Shopping list
   var ids=Object.keys(t.raw).sort(function(a,b){return t.raw[b]-t.raw[a]});
@@ -76,7 +76,7 @@ function html(skill,st,G){
   if(!wear.length)h+='<p class="muted">No clothing in the game files has a '+esc(low)+' perk.</p>';
   else h+='<div class="gt nospd" role="table"><div class="gt-h" role="row"><span role="columnheader">Item</span><span role="columnheader">Slot</span><span role="columnheader">Tier</span><span role="columnheader">Gear score</span><span role="columnheader">Perk</span><span role="columnheader">How to get it</span></div>'+
     wear.map(function(w){var rc=D.byOut[w.id]&&D.byOut[w.id][0];return '<div class="gt-r"><div class="gt-row" role="row"><span class="gt-n" role="cell">'+((D.byOut[w.id]||D.N[w.id])?App.itemLink(w.id,w.n):esc(w.n))+'</span><span role="cell" data-l="Slot">'+esc(w.slot)+'</span><span role="cell" data-l="Tier">T'+w.tr+'</span><span role="cell" data-l="Gear score">'+w.gs+'</span><span class="gt-p" role="cell">'+w.pk.map(function(p){return esc(p[2])}).join("<br>")+'</span><span role="cell"><span class="b plain">'+esc(w.src)+'</span>'+(w.src==="Crafted"&&rc&&rc.t?' <span class="muted">'+esc(rc.t)+' '+(rc.l||0)+'</span>':'')+'</span></div></div>'}).join("")+'</div>';
-  h+='<p class="note">Perk values from the game files. Guides agree that each piece of a refining set adds about 2% yield, matching the files (<a href="https://www.icy-veins.com/new-world/weaving-trade-skill-guide" rel="noopener" target="_blank">Icy Veins</a>). "Crafted Item Quality" is the game’s name for it; it is understood to help what you craft roll a higher gear score.</p></section>';
+  h+='<p class="note">Perk values from the game files. Guides agree that each piece of a refining set adds about 2% yield, matching the files (<a href="https://www.icy-veins.com/new-world/weaving-trade-skill-guide" rel="noopener" target="_blank">Icy Veins</a>). "Crafted Item Quality" is the game’s name for it; it is understood to help what you craft roll a higher gear score'+App.unsure("Common understanding from players; the game files do not spell out the exact effect.")+'.</p></section>';
   h+='</div></div>';
   return h;
 }

@@ -255,3 +255,54 @@ a.btn{display:inline-block;padding:10px 16px;border-radius:10px;background:var(-
 .seg{max-width:100%}
 .step .cost{grid-column:2/4;display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;font-size:.88rem}
 .step .cost b{color:var(--azoth)}
+
+/* "not 100%": anything the game files or testing do not confirm */
+.unsure{display:inline-block;margin-left:6px;padding:0 7px;border-radius:999px;font:600 .68rem/1.6 var(--body);color:var(--ember);border:1px dashed color-mix(in srgb,var(--ember) 60%,transparent);background:var(--ember-bg);cursor:help;vertical-align:middle;white-space:nowrap}
+.unsure:focus-visible{box-shadow:var(--focus)}
+
+/* Attribute chips */
+.at{display:inline-flex;align-items:center;gap:5px;padding:1px 9px;border-radius:999px;font-size:.78rem;font-weight:600;color:var(--a);background:color-mix(in srgb,var(--a) 13%,transparent);border:1px solid color-mix(in srgb,var(--a) 40%,transparent)}
+.at::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--a);box-shadow:0 0 6px var(--a)}
+
+/* Weapon cards */
+.wfilters{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:0 0 18px}
+.wfilters input[type=search]{min-width:240px;flex:1;max-width:420px}
+.wgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:14px}
+.wcard{position:relative;padding:16px;border-radius:var(--r-l);background:linear-gradient(160deg,color-mix(in srgb,var(--a) 12%,rgba(30,38,66,.9)),rgba(20,26,46,.85));border:1px solid color-mix(in srgb,var(--a) 30%,var(--line));transition:transform .25s var(--ease),box-shadow .25s,border-color .25s;transform-style:preserve-3d}
+.wcard:hover{border-color:var(--a);box-shadow:0 14px 34px rgba(5,8,18,.55),0 0 0 1px color-mix(in srgb,var(--a) 50%,transparent)}
+.wcard h3{margin:0 0 4px;font:600 1.2rem var(--display);font-stretch:85%}
+.wcard .hands{font-size:.78rem;color:var(--mute)}
+.wcard .ats{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0 12px}
+.wcard label.cmp{position:absolute;top:12px;right:12px;display:flex;gap:6px;align-items:center;font-size:.78rem;color:var(--mute);cursor:pointer}
+.wcard.picked{border-color:var(--azoth);box-shadow:0 0 0 2px var(--azoth)}
+.bars{display:grid;grid-template-columns:auto 1fr auto;gap:5px 10px;align-items:center;font-size:.82rem}
+.bars span{color:var(--mute)}
+.bars i{display:block;height:6px;border-radius:3px;background:linear-gradient(90deg,color-mix(in srgb,var(--a) 50%,transparent),var(--a))}
+.bars b{font:600 .88rem var(--display);font-variant-numeric:tabular-nums;text-align:right}
+.est{margin-top:10px;font-size:.84rem;color:var(--mute)}.est b{color:var(--mist)}
+.cmpbar{position:sticky;bottom:12px;z-index:5;display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:16px;padding:10px 14px;border-radius:14px;background:rgba(20,26,46,.92);backdrop-filter:blur(10px);border:1px solid var(--azoth);box-shadow:0 10px 30px rgba(5,8,18,.6)}
+table.cmp{width:100%;border-collapse:collapse;font-size:.92rem}
+table.cmp th,table.cmp td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:left}
+table.cmp th{color:var(--mute);font-weight:500;width:16em}
+table.cmp td.best{color:var(--azoth);font-weight:600}
+
+/* Attributes */
+.attrs{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:14px}
+.acard{padding:16px;border-radius:var(--r-l);background:linear-gradient(160deg,color-mix(in srgb,var(--a) 14%,rgba(30,38,66,.9)),rgba(20,26,46,.85));border:1px solid color-mix(in srgb,var(--a) 35%,var(--line))}
+.acard h3{margin:0 0 8px;font:600 1.3rem var(--display);font-stretch:85%;color:var(--a)}
+.acard ol{list-style:none;margin:8px 0 0;padding:0}
+.acard li{display:grid;grid-template-columns:44px 1fr;gap:10px;padding:7px 0;border-top:1px solid rgba(46,57,88,.6);font-size:.88rem}
+.acard li b{font:600 1rem var(--display);color:var(--a)}
+.acard li span{white-space:pre-line}
+.chart{width:100%;height:auto;display:block}
+.chart text{fill:var(--mute);font:12px var(--body)}
+.mine{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px}
+.mine label{display:flex;flex-direction:column;gap:4px;font-size:.82rem;color:var(--a)}
+@media (max-width:700px){.mine{grid-template-columns:repeat(3,minmax(0,1fr))}}
+
+/* Perk list */
+.plist{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:10px}
+.pk{padding:12px 14px;border-radius:12px;background:rgba(28,36,64,.6);border:1px solid var(--line)}
+.pk b{display:block;font:600 1rem var(--display);font-stretch:90%;margin-bottom:4px}
+.pk p{margin:0 0 8px;font-size:.88rem;line-height:1.5}
+.pk .on{display:flex;flex-wrap:wrap;gap:4px}

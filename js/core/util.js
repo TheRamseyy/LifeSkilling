@@ -13,5 +13,9 @@ App.itemLink=function(id,label){return '<a href="#/item/'+encodeURIComponent(id)
 App.SKILL_COL={Mining:"#E8955A",Logging:"#7BC96F",Harvesting:"#E8CF5A",Skinning:"#E8776F",Fishing:"#5AA8E8",
   Arcana:"#B9A4FF",Armoring:"#9FB4CC",Cooking:"#F2A65A",Engineering:"#E8C25A",Furnishing:"#C9A27A",Jewelcrafting:"#F48FB1",
   Leatherworking:"#C98A5A",Smelting:"#FF8A5C",Stonecutting:"#BDB8A6",Weaponsmithing:"#E8776F",Weaving:"#7FD1C9",Woodworking:"#8FCB6F"};
+// Marker for anything not confirmed by the game files or testing. The tip explains why.
+App.unsure=function(tip){return '<span class="unsure" tabindex="0" role="note" title="'+App.esc(tip)+'" aria-label="Not 100% sure: '+App.esc(tip)+'">not 100%</span>'};
+// Attribute colours, used on every weapon and attribute page
+App.ATTR={Str:["Strength","#E8776F"],Dex:["Dexterity","#7BC96F"],Int:["Intelligence","#5AA8E8"],Foc:["Focus","#B9A4FF"],Con:["Constitution","#F2B45A"]};
 App.nodeLine=function(v){return '<b>'+App.esc(v[0])+'</b>, '+App.esc(v[1])+(v[2]?' level '+v[2]:'')+', respawns in '+App.dur(v[3],1)+'–'+App.dur(v[4])+', takes '+App.dur(v[5])+' to gather'};
 })();

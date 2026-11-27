@@ -62,7 +62,7 @@ function draw(root,skill,G){
   // the plain crafted tool of each tier sets the speed scale players compare against
   var scale=[1,2,3,4,5].map(function(t){return easyPick(tools,t,function(x){return x.src==="Crafted"&&!x.pk.length})}).filter(Boolean);
 
-  var h='<h1>'+esc(skill)+' gear</h1><p class="sub">What to use for '+esc(low)+' as you level up, and every tool and clothing piece that helps. Read from the game files; perk values are worked out at each item\'s gear score.</p>';
+  var h='<h1>'+esc(skill)+' gear</h1><p class="sub">What to use for '+esc(low)+' as you level up, and every tool and clothing piece that helps. Read from the game files; perk values are worked out at each item\'s gear score'+App.unsure("Worked out with the game\u2019s own perk scaling formula. In-game tooltips may differ slightly.")+'.</p>';
   h+='<nav class="seg" aria-label="Gathering skill">'+SKILLS.map(function(s){return '<a style="--c:'+App.SKILL_COL[s]+'" href="#/gather/gear/'+s.toLowerCase()+'"'+(s===skill?' aria-current="page"':'')+'>'+esc(s)+'</a>'}).join("")+'</nav>';
 
   // How to read this page
@@ -90,10 +90,10 @@ function draw(root,skill,G){
     h+='<p><span class="k">Tool</span>'+(tl?link(tl)+' <span class="muted">('+(fish?'':'speed '+tl.sp+', ')+'gear score '+tl.gs+(tl.lv?', equip level '+tl.lv:'')+')</span> '+howToGet(tl):'<span class="muted">None in the files</span>')+'</p>';
     if(B.top&&bt&&bt!==tl)h+='<p><span class="k">Upgrade later</span>'+link(bt)+' <span class="muted">(gear score '+bt.gs+')</span> '+howToGet(bt)+'</p>';
     h+='<p><span class="k">Clothing</span>'+(wl.length?wl.map(function(w){return link(w)+' <span class="muted">'+esc(w.slot.toLowerCase())+', GS '+w.gs+'</span>'}).join(", ")+'<br><span class="muted">'+esc(SOURCE[wl[0].src]||"")+'</span>':'<span class="muted">No tier '+B.tr+' '+esc(low)+' clothing in the files.'+(B.tr===2?' It starts at tier 3, from level 50.':'')+'</span>')+'</p>';
-    if(spd)h+='<p><span class="k">Skill bonus</span>Your '+esc(low)+' level itself adds '+spd+' to gathering speed.</p>';
+    if(spd)h+='<p><span class="k">Skill bonus</span>Your '+esc(low)+' level itself adds '+spd+' to gathering speed'+App.unsure("The game value from the skill table. How it combines with the tool speed is not confirmed.")+'.</p>';
     h+='</div></li>';
   });
-  h+='</ol><p class="note">Tools go up a tier every 50 levels, in step with the new nodes. The game files do not say which tool to use when; this is a rule of thumb.</p></section>';
+  h+='</ol><p class="note">Tools go up a tier every 50 levels, in step with the new nodes. The game files do not say which tool to use when; this is a rule of thumb.'+App.unsure("A suggestion based on when new nodes open, not something the game files say.")+'</p></section>';
 
   // Endgame best in slot
   h+='<section class="card" aria-labelledby="h-bis"><h2 id="h-bis">Endgame best in slot</h2><p class="muted" style="margin:-6px 0 14px">The strongest pieces in the game files, mostly at top gear score. A long-term goal, not what you need to start.</p><div class="doll">';

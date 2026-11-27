@@ -47,7 +47,7 @@ App.page("gather/runs",{title:"Gathering run planner",needsData:true,render:func
         return '<div class="item"><span class="n">'+App.itemLink(m.id)+'<div class="muted">'+(m.reason==="level"?'Needs '+esc(m.skill)+' level '+m.level+'. Your level is '+esc(S.levels[m.skill])+'.':'No gathering node drops this. Likely a creature drop, chest, vendor, salvage or event item.')+'</div></span><span class="c">'+fmt(m.qty)+'</span></div>';
       }).join("")+'</section>';
     }
-    h+='<p class="note">Each stop is a kind of node that <i>can drop</i> the materials listed. The game files have no drop chances or amounts, so the planner cannot say how many nodes you need. Visit several of the same kind in one area, and loop back as they respawn.</p>';
+    h+='<p class="note">Each stop is a kind of node that <i>can drop</i> the materials listed'+App.unsure("Some low-level nodes list rarer drops that may only appear at a higher skill level.")+'. The game files have no drop chances or amounts, so the planner cannot say how many nodes you need. Visit several of the same kind in one area, and loop back as they respawn.</p>';
     h+='</div></div>';
     root.innerHTML=h;
   }
