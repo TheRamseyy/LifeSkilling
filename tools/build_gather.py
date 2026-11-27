@@ -1,4 +1,4 @@
-# Builds site/gather.json from extracted datatables.
+# Builds gather.json from extracted datatables.
 # Usage: python build_gather.py <datatables_dir> <en-us.json> <out_gather.json>
 import json,re,sys
 D,LOC,OUT=sys.argv[1].rstrip('/\\')+'/',sys.argv[2],sys.argv[3]
