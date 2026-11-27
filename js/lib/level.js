@@ -13,7 +13,8 @@ var MINSHARE=0.25;
 var REAGENT=/^(Flux|Sandpaper|Tannin|Solvent|Weave)T\d/;
 
 /* opt: {recipes, byOut, cats, gather, xp (array: xp[n] = XP from level n to n+1),
-         skill, from, to, mode: "fast"|"cheap", prices: {itemId: price}, pick: {catId: itemId}}
+         skill, from, to, mode: "fast"|"cheap", prices: {itemId: price}, pick: {catId: itemId},
+         bonus: extra XP as a fraction, e.g. 1 for double XP (optional)}
    Returns {steps:[{from,to,r,crafts,xp,raw,units,cost}], total:{crafts,xp,raw,units,cost,fee}} */
 function route(opt){
   var from=Math.max(0,opt.from|0),to=Math.min(opt.xp.length,opt.to|0),cache={};
@@ -68,11 +69,12 @@ function route(opt){
     if(last&&last.r===r){last.to=b;last.xp+=need}else steps.push({from:a,to:b,r:r,xp:need});
   }
   var total={crafts:0,xp:0,raw:{},units:0,cost:0,fee:0,priced:true};
+  var mult=1+Math.max(0,+opt.bonus||0);
   steps.forEach(function(s){
     total.xp+=s.xp;
     if(!s.r)return;
     var o=one(s.r);
-    s.crafts=Math.ceil(s.xp/s.r.x);
+    s.crafts=Math.ceil(s.xp/(s.r.x*mult));
     s.raw={};Object.keys(o.raw).forEach(function(id){s.raw[id]=o.raw[id]*s.crafts;total.raw[id]=(total.raw[id]||0)+s.raw[id]});
     s.units=o.units*s.crafts;s.cost=o.cost==null?null:o.cost*s.crafts;
     total.crafts+=s.crafts;total.units+=s.units;total.fee+=(s.r.fee||0)*s.crafts;

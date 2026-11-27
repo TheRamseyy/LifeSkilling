@@ -52,7 +52,7 @@ App.page("gather/gear",{title:"Gathering gear",needsData:true,render:function(ro
   var skill=SKILLS.filter(function(s){return s.toLowerCase()===(param||"mining").toLowerCase()})[0]||"Mining";
   document.title=skill+" gear · Aeternum Crafting";
   root.innerHTML='<h1>'+esc(skill)+' gear</h1><p class="loading">Loading gear data…</p>';
-  App.loadJSON("gear.json").then(function(G){draw(root,skill,G)})
+  Promise.all([App.loadJSON("gear.json"),App.loadJSON("boosts.json")]).then(function(all){all[0].boosts=all[1].boosts;draw(root,skill,all[0])})
     .catch(function(){root.innerHTML='<h1>Gathering gear</h1><p class="err">The gear data did not load. Check your connection and reload the page.</p>'});
 }});
 
@@ -94,6 +94,10 @@ function draw(root,skill,G){
     h+='</div></li>';
   });
   h+='</ol><p class="note">Tools go up a tier every 50 levels, in step with the new nodes. The game files do not say which tool to use when; this is a rule of thumb.'+App.unsure("A suggestion based on when new nodes open, not something the game files say.")+'</p></section>';
+
+  // Boosts
+  h+='<section class="card" aria-labelledby="h-bst"><h2 id="h-bst">Boosts for '+esc(low)+'</h2><p class="muted" style="margin:-6px 0 12px">Food, housing trophies, territory buffs, music and attribute bonuses that help, from the game files. Luck is shown as a percentage: the game counts 100 luck points as 1%.</p>'+App.boostTable(G.boosts,skill)+
+    '<p class="note">Official servers have also had permanent double gathering XP since 21 April 2026 (<a href="https://www.mmorpg.com/news/new-world-aeternum-will-loosen-more-restrictions-turn-on-xp-bonus-to-let-remaining-players-access-content-2000137857" rel="noopener" target="_blank">MMORPG.com</a>)'+App.unsure("Project Azoth has not published its XP rates.")+'.</p></section>';
 
   // Endgame best in slot
   h+='<section class="card" aria-labelledby="h-bis"><h2 id="h-bis">Endgame best in slot</h2><p class="muted" style="margin:-6px 0 14px">The strongest pieces in the game files, mostly at top gear score. A long-term goal, not what you need to start.</p><div class="doll">';

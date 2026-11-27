@@ -58,3 +58,10 @@ test("a partial range only counts the levels asked for", () => {
   assert.strictEqual(r.steps[0].from, 60);
   assert.strictEqual(r.steps[r.steps.length - 1].to, 80);
 });
+
+test("an XP bonus cuts the crafts needed", () => {
+  const base = L.route(opt("Smelting", "fast")), dbl = L.route(opt("Smelting", "fast", { bonus: 1 }));
+  assert.ok(dbl.total.crafts <= Math.ceil(base.total.crafts / 2) + dbl.steps.length);
+  assert.ok(dbl.total.crafts >= Math.floor(base.total.crafts / 2));
+  assert.strictEqual(dbl.total.xp, base.total.xp, "XP needed does not change");
+});

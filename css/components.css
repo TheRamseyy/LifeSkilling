@@ -306,3 +306,5 @@ table.cmp td.best{color:var(--azoth);font-weight:600}
 .pk b{display:block;font:600 1rem var(--display);font-stretch:90%;margin-bottom:4px}
 .pk p{margin:0 0 8px;font-size:.88rem;line-height:1.5}
 .pk .on{display:flex;flex-wrap:wrap;gap:4px}
+.gt.bst .gt-h,.gt.bst .gt-row{grid-template-columns:minmax(200px,1.4fr) 150px 190px 100px minmax(220px,2fr)}
+@media (max-width:900px){.gt.bst .gt-row{grid-template-columns:1fr 1fr 1fr}}

@@ -8,7 +8,8 @@ App.page("craft/levelling",{title:"Level a crafting skill",needsData:true,render
   var skill=SKILLS.filter(function(s){return s.toLowerCase()===(param||"smelting").toLowerCase()})[0]||"Smelting";
   document.title="Level "+skill+" · Aeternum Crafting";
   root.innerHTML='<h1>Level '+esc(skill)+'</h1><p class="loading">Loading…</p>';
-  App.loadJSON("gear.json").then(function(G){
+  Promise.all([App.loadJSON("gear.json"),App.loadJSON("boosts.json")]).then(function(all){
+    var G=all[0];G.boosts=all[1].boosts;
     S.lvl=S.lvl||{};
     var st=S.lvl[skill]=S.lvl[skill]||{from:0,to:250,mode:"fast"};
     function draw(){App.accent(App.SKILL_COL[skill],"#B9A4FF");root.innerHTML=html(skill,st,G)}
@@ -16,6 +17,8 @@ App.page("craft/levelling",{title:"Level a crafting skill",needsData:true,render
     root.addEventListener("change",function(e){
       var t=e.target,k=t.dataset&&t.dataset.f;if(!k)return;
       if(k==="mode")st.mode=t.value;
+      else if(k==="bonus")st.bonus=t.value;
+      else if(k==="pct")st.pct=Math.max(0,Math.min(500,parseFloat(t.value)||0));
       else st[k]=Math.max(0,Math.min(250,parseInt(t.value,10)||0));
       if(st.from>st.to){var x=st.from;st.from=st.to;st.to=x}
       App.save();draw();
@@ -30,9 +33,12 @@ App.page("craft/levelling",{title:"Level a crafting skill",needsData:true,render
   }).catch(function(e){root.innerHTML='<h1>Level a crafting skill</h1><p class="err">Data did not load ('+esc(e.message)+'). Reload the page.</p>'});
 }});
 
+var REFINE=["Smelting","Woodworking","Leatherworking","Weaving","Stonecutting"];
+// Extra XP as a fraction: none, the official double XP, or your own percentage
+function xpBonus(st){return st.bonus==="double"?1:st.bonus==="custom"?(+st.pct||0)/100:0}
 function html(skill,st,G){
   var D=App.data,low=skill.toLowerCase();
-  var r=NWLevel.route({recipes:D.R,byOut:D.byOut,cats:D.C,gather:D.G,xp:G.crafting[skill].xp,skill:skill,from:st.from,to:st.to,mode:st.mode,prices:S.prices,pick:S.pick});
+  var r=NWLevel.route({recipes:D.R,byOut:D.byOut,cats:D.C,gather:D.G,xp:G.crafting[skill].xp,skill:skill,from:st.from,to:st.to,mode:st.mode,prices:S.prices,pick:S.pick,bonus:xpBonus(st)});
   var h='<h1>Level '+esc(skill)+'</h1><p class="sub">What to craft at each stage to level '+esc(low)+', how many times, and everything it takes. Recipe XP and level XP come from the game files.</p>';
   h+='<nav class="seg" aria-label="Crafting skill">'+SKILLS.map(function(s){return '<a style="--c:'+App.SKILL_COL[s]+'" href="#/craft/levelling/'+s.toLowerCase()+'"'+(s===skill?' aria-current="page"':'')+'>'+esc(s)+'</a>'}).join("")+'</nav>';
 
@@ -40,6 +46,10 @@ function html(skill,st,G){
   h+='<section class="card glass" aria-labelledby="h-set"><h2 id="h-set">Your plan</h2><div class="lvls">'+
     '<label><span>Current level</span><input type="number" min="0" max="250" inputmode="numeric" data-f="from" value="'+st.from+'"></label>'+
     '<label><span>Target level</span><input type="number" min="0" max="250" inputmode="numeric" data-f="to" value="'+st.to+'"></label></div>'+
+    '<fieldset class="pick" style="margin-top:12px"><legend>XP bonus</legend><div class="chips" role="radiogroup" aria-label="XP bonus">'+
+    [["none","None"],["double","Double XP"],["custom","Custom"]].map(function(o){return '<label><input type="radio" name="bonus" data-f="bonus" value="'+o[0]+'"'+((st.bonus||"none")===o[0]?" checked":"")+'><span>'+o[1]+'</span></label>'}).join("")+'</div>'+
+    (st.bonus==="custom"?'<label class="muted" style="display:block;margin-top:8px">Extra XP %<input type="number" min="0" max="500" data-f="pct" value="'+esc(st.pct||0)+'" style="margin-left:8px;width:90px"></label>':'')+
+    '<p class="muted" style="margin:8px 0 0">'+(st.bonus==="double"?(REFINE.indexOf(skill)>=0?'Official servers have had permanent double XP for refining since 21 April 2026 (<a href="https://www.mmorpg.com/news/new-world-aeternum-will-loosen-more-restrictions-turn-on-xp-bonus-to-let-remaining-players-access-content-2000137857" rel="noopener" target="_blank">MMORPG.com</a>).':'The official double XP covered characters, weapons, gathering and refining; '+esc(skill)+' was not listed.')+App.unsure("Project Azoth has not published its XP rates; this follows the official servers."):'No bonus: base XP from the game files.')+'</p></fieldset>'+
     '<fieldset class="pick" style="margin-top:12px"><legend>Route</legend><div class="chips" role="radiogroup" aria-label="Route">'+
     '<label><input type="radio" name="mode" data-f="mode" value="fast"'+(st.mode==="fast"?" checked":"")+'><span>Fastest</span></label>'+
     '<label><input type="radio" name="mode" data-f="mode" value="cheap"'+(st.mode==="cheap"?" checked":"")+'><span>Cheapest</span></label></div>'+
@@ -72,11 +82,12 @@ function html(skill,st,G){
 
   // Crafting clothing
   var wear=G.crafting[skill].wear;
+  h+='<section class="card" aria-labelledby="h-bst"><h2 id="h-bst">Boosts for '+esc(low)+'</h2><p class="muted" style="margin:-6px 0 12px">Food, housing trophies, territory buffs and more, from the game files. Crafting skills have no XP boosts in the files; these raise the gear score you craft, or your chances of extra items.</p>'+App.boostTable(G.boosts,skill)+'</section>';
   h+='<section class="card" aria-labelledby="h-cw"><h2 id="h-cw">Clothing that helps '+esc(low)+'</h2>';
   if(!wear.length)h+='<p class="muted">No clothing in the game files has a '+esc(low)+' perk.</p>';
   else h+='<div class="gt nospd" role="table"><div class="gt-h" role="row"><span role="columnheader">Item</span><span role="columnheader">Slot</span><span role="columnheader">Tier</span><span role="columnheader">Gear score</span><span role="columnheader">Perk</span><span role="columnheader">How to get it</span></div>'+
     wear.map(function(w){var rc=D.byOut[w.id]&&D.byOut[w.id][0];return '<div class="gt-r"><div class="gt-row" role="row"><span class="gt-n" role="cell">'+((D.byOut[w.id]||D.N[w.id])?App.itemLink(w.id,w.n):esc(w.n))+'</span><span role="cell" data-l="Slot">'+esc(w.slot)+'</span><span role="cell" data-l="Tier">T'+w.tr+'</span><span role="cell" data-l="Gear score">'+w.gs+'</span><span class="gt-p" role="cell">'+w.pk.map(function(p){return esc(p[2])}).join("<br>")+'</span><span role="cell"><span class="b plain">'+esc(w.src)+'</span>'+(w.src==="Crafted"&&rc&&rc.t?' <span class="muted">'+esc(rc.t)+' '+(rc.l||0)+'</span>':'')+'</span></div></div>'}).join("")+'</div>';
-  h+='<p class="note">Perk values from the game files. Guides agree that each piece of a refining set adds about 2% yield, matching the files (<a href="https://www.icy-veins.com/new-world/weaving-trade-skill-guide" rel="noopener" target="_blank">Icy Veins</a>). "Crafted Item Quality" is the game’s name for it; it is understood to help what you craft roll a higher gear score'+App.unsure("Common understanding from players; the game files do not spell out the exact effect.")+'.</p></section>';
+  h+='<p class="note">Perk values from the game files. Guides agree that each piece of a refining set adds about 2% yield, matching the files (<a href="https://www.icy-veins.com/new-world/weaving-trade-skill-guide" rel="noopener" target="_blank">Icy Veins</a>). "Crafted Item Quality" adds that many points to both the lowest and the highest gear score your crafts can roll (from the game files).</p></section>';
   h+='</div></div>';
   return h;
 }
