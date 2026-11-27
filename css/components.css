@@ -1,32 +1,4 @@
-/* Shared look for every page. Dark, warm "Aeternum" palette. */
-:root{
-  --bg:#110e0a;--bg2:#17130e;--panel:#1d1812;--panel2:#262017;--line:#3b3124;--line2:#4d402e;
-  --ink:#f1e8d4;--mute:#b0a48b;--gold:#e0ad4c;--gold2:#f4ca74;--warn:#ef9a5a;
-  --raw:#8fd08a;--rawbg:#1b2a19;--craft:#e0ad4c;--craftbg:#2c2414;--cat:#9cc3f2;--catbg:#172434;--buy:#c8a6f0;
-  --r:12px;--focus:0 0 0 3px #f4ca74;
-}
-*{box-sizing:border-box}
-html{scroll-behavior:smooth;scroll-padding-top:70px}
-@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
-body{margin:0;background:radial-gradient(1200px 500px at 50% -200px,#2a1f12,transparent),var(--bg);color:var(--ink);font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;min-height:100vh}
-a{color:var(--gold2)}
-:focus-visible{outline:none;box-shadow:var(--focus);border-radius:6px}
-.skip{position:absolute;left:-999px;top:8px;background:var(--gold);color:#000;padding:8px 12px;border-radius:8px;z-index:20}
-.skip:focus{left:8px}
-
-/* Top navigation */
-.top{position:sticky;top:0;z-index:10;background:rgba(17,14,10,.94);backdrop-filter:blur(6px);border-bottom:1px solid var(--line)}
-.top .in{max-width:1180px;margin:0 auto;padding:8px 14px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
-.brand{font:600 1.1rem Georgia,"Times New Roman",serif;color:var(--gold2);text-decoration:none;letter-spacing:.03em;white-space:nowrap}
-.brand span{color:var(--mute);font:400 .75rem system-ui,sans-serif;margin-left:6px}
-nav.main{display:flex;gap:4px;overflow-x:auto;flex:1;scrollbar-width:none}
-nav.main a,nav.main .soon{padding:7px 11px;border-radius:8px;text-decoration:none;color:var(--ink);white-space:nowrap;font-size:.92rem}
-nav.main a:hover{background:var(--panel2)}
-nav.main a[aria-current=page]{background:var(--craftbg);color:var(--gold2);box-shadow:inset 0 -2px 0 var(--gold)}
-nav.main .soon{color:var(--mute);opacity:.7;font-size:.85rem}
-nav.main .soon small{font-size:.65rem;border:1px solid var(--line2);border-radius:99px;padding:0 5px;margin-left:4px}
-
-.wrap{max-width:1180px;margin:0 auto;padding:16px 14px 60px}
+/* Shared building blocks: cards, buttons, badges, lists, tree. Colours come from tokens.css. */
 h1{font:600 1.45rem Georgia,"Times New Roman",serif;margin:4px 0 2px;color:var(--gold2)}
 .sub{color:var(--mute);font-size:.88rem;margin:0 0 14px}
 .card{background:linear-gradient(180deg,var(--panel),var(--bg2));border:1px solid var(--line);border-radius:var(--r);padding:14px;margin-bottom:14px}
@@ -67,12 +39,6 @@ button.sm{padding:4px 10px;font-size:.82rem}
 .jump{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 14px}
 .jump a{font-size:.85rem;padding:5px 11px;border:1px solid var(--line2);border-radius:99px;text-decoration:none;color:var(--ink);background:var(--panel)}
 .jump a:hover{border-color:var(--gold)}
-
-/* Calculator layout: two columns on wide screens */
-@media (min-width:980px){
-  .calc{display:grid;grid-template-columns:380px 1fr;gap:16px;align-items:start}
-  .calc .side{position:sticky;top:64px;max-height:calc(100vh - 76px);overflow-y:auto;padding-right:2px}
-}
 
 /* Where-to-get-it details */
 details.nodes{margin-top:4px}
@@ -135,4 +101,14 @@ fieldset.pick legend{padding:0 6px;font-weight:600}
 .prose{max-width:760px}
 .prose h2{font:600 1.1rem Georgia,serif;color:var(--gold2);margin:22px 0 6px}
 .prose li{margin:4px 0}
-footer.foot{max-width:1180px;margin:0 auto;padding:0 14px 30px;color:var(--mute);font-size:.8rem}
+
+/* Item page */
+.facts{display:flex;gap:6px;flex-wrap:wrap;margin:4px 0 14px}
+.ing{display:flex;gap:10px;align-items:center;padding:8px 0;border-top:1px solid var(--line)}
+.ing:first-child{border-top:0}
+.ing .n{flex:1;min-width:0}
+.links{display:flex;flex-wrap:wrap;gap:6px}
+.links a{font-size:.86rem;padding:4px 10px;border:1px solid var(--line2);border-radius:99px;text-decoration:none;color:var(--ink);background:var(--panel2)}
+.links a:hover{border-color:var(--gold)}
+.sugg .tag{font-size:.72rem;color:var(--mute)}
+.loading{color:var(--mute);padding:30px 0}

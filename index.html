@@ -4,65 +4,40 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="color-scheme" content="dark">
-<title>Crafting Calculator · Aeternum Crafting Tools</title>
-<link rel="stylesheet" href="assets/style.css">
+<title>Aeternum Crafting</title>
+<link rel="stylesheet" href="css/tokens.css">
+<link rel="stylesheet" href="css/layout.css">
+<link rel="stylesheet" href="css/components.css">
 </head>
 <body>
-<a class="skip" href="#main">Skip to calculator</a>
+<a class="skip" href="#main">Skip to content</a>
 <header class="top"><div class="in">
-  <a class="brand" href="./">Aeternum Crafting<span>for Project Azoth</span></a>
-  <nav class="main" aria-label="Pages">
-    <a href="./" aria-current="page">Crafting calculator</a>
-    <a href="about.html">About the data</a>
-    <span class="soon" aria-disabled="true">Gathering gear<small>soon</small></span>
-    <span class="soon" aria-disabled="true">Weapon attributes<small>soon</small></span>
-    <span class="soon" aria-disabled="true">Gathering runs<small>soon</small></span>
-  </nav>
-</div></header>
-
-<main class="wrap" id="main">
-  <h1>Crafting calculator</h1>
-  <p class="sub" id="stat">Loading recipe data…</p>
-
-  <div class="calc">
-    <div class="side">
-      <section class="card" aria-labelledby="h-search">
-        <h2 id="h-search">What do you want to craft?</h2>
-        <div class="row">
-          <input id="target" class="grow" placeholder="Search an item, e.g. Steel Ingot" autocomplete="off" aria-label="Search an item" aria-controls="sugg">
-          <input id="qty" class="q" type="number" min="1" value="1" inputmode="numeric" aria-label="Quantity">
-        </div>
-        <div id="sugg" class="sugg" hidden></div>
-        <p class="muted" style="margin:8px 0 0">Type 2+ letters. Arrow keys move through results, Enter adds.</p>
-      </section>
-
-      <section class="card" aria-labelledby="h-list"><h2 id="h-list">Craft list</h2><div id="list"></div></section>
-
-      <section class="card" id="flexcard" aria-labelledby="h-flex" hidden>
-        <h2 id="h-flex">Flexible materials</h2>
-        <p class="muted" style="margin:0 0 10px">Some recipes accept any item of a type. Pick the one you will use: it is added to your totals, steps and gathering.</p>
-        <div id="flex"></div>
-      </section>
-    </div>
-
-    <div>
-      <nav class="jump" aria-label="Results sections">
-        <a href="#rawcard">Materials</a><a href="#gathcard">Gathering</a><a href="#stepcard">Steps</a><a href="#skillcard">Skills</a><a href="#stationcard">Stations</a><a href="#treecard">Tree</a>
-      </nav>
-      <section class="card" id="rawcard" aria-labelledby="h-raw"><h2 id="h-raw">Raw materials to gather or buy</h2><div id="raw"></div></section>
-      <section class="card" id="gathcard" aria-labelledby="h-gath"><h2 id="h-gath">Gathering skills needed</h2><div id="gath"></div></section>
-      <section class="card" id="stepcard" aria-labelledby="h-steps"><h2 id="h-steps">Crafting steps (in order)</h2><div id="steps"></div></section>
-      <section class="card" id="skillcard" aria-labelledby="h-skills"><h2 id="h-skills">Crafting skills needed</h2><div id="skills"></div></section>
-      <section class="card" id="stationcard" aria-labelledby="h-st"><h2 id="h-st">Stations</h2><div id="stations"></div></section>
-      <section class="card" id="treecard" aria-labelledby="h-tree">
-        <h2 id="h-tree">Breakdown tree <span class="act" id="treeact"><button class="sm" id="expall" type="button">Expand all</button><button class="sm" id="colall" type="button">Collapse all</button></span></h2>
-        <div class="legend"><span class="b craft">crafted</span><span class="b raw">gather / raw</span><span class="b buy">bought</span><span class="b cat">chosen "any" item</span><span class="b warn">pick one</span></div>
-        <div id="tree"></div>
-      </section>
-    </div>
+  <a class="brand" href="#/craft/calculator">Aeternum Crafting<span>for Project Azoth</span></a>
+  <div class="gsearch" role="search">
+    <input id="gq" type="search" placeholder="Search any item or material…" autocomplete="off" aria-label="Search any item or material">
+    <kbd aria-hidden="true">/</kbd>
+    <div id="gsugg" class="sugg" hidden></div>
   </div>
-</main>
-<footer class="foot">Data read from game files and not verified on Azoth. Gathering shows which nodes can drop each material, not amounts or chances. <a href="about.html">More about the data</a>.</footer>
-<script src="assets/calc.js"></script>
+</div></header>
+<div class="shell">
+  <nav class="side" id="side" aria-label="Sections"></nav>
+  <main class="wrap" id="main" tabindex="-1"><p class="loading">Loading…</p></main>
+</div>
+<noscript><p style="padding:20px">This tool needs JavaScript turned on.</p></noscript>
+<!-- core -->
+<script src="js/lib/calc.js"></script>
+<script src="js/core/util.js"></script>
+<script src="js/core/storage.js"></script>
+<script src="js/core/data.js"></script>
+<script src="js/core/search.js"></script>
+<script src="js/core/router.js"></script>
+<!-- pages: one file each -->
+<script src="js/pages/calculator.js"></script>
+<script src="js/pages/item.js"></script>
+<script src="js/pages/about.js"></script>
+<script src="js/pages/limits.js"></script>
+<script src="js/pages/changelog.js"></script>
+<!-- menu and start-up -->
+<script src="js/app.js"></script>
 </body>
 </html>
