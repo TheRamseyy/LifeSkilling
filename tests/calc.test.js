@@ -55,3 +55,19 @@ test("recipe loops do not run forever", () => {
   const c = C.expand([{ id: "A", qty: 1 }], { byOut: loop });
   assert.strictEqual(c.raw.A, 2);
 });
+
+test("craft cost per item, including the crafting fee", () => {
+  // Iron Ingot: 4 Iron Ore + 1 coin fee
+  const c = C.craftCost("IngotT2", { byOut, cats, prices: { OreT1: 0.5 } });
+  assert.strictEqual(c.each, 4 * 0.5 + 1);
+  // Cut Flawed Diamond needs Life Motes too: without their price there is no total, and it says what is missing
+  const d = C.craftCost("DiamondCutT1", { byOut, cats, prices: { DiamondT1: 10 } });
+  assert.strictEqual(d.each, null);
+  assert.deepStrictEqual(d.missing, ["AlchemyLifeT1"]);
+});
+
+test("a bought ingredient uses its price instead of being crafted", () => {
+  const c = C.craftCost("IngotT3", { byOut, cats, prices: { IngotT2: 3, FluxT5: 20, CharcoalT1: 1 }, buy: { IngotT2: 1, FluxT5: 1, CharcoalT1: 1 } });
+  const r = byOut.IngotT3[0];
+  assert.strictEqual(c.each, (3 * 3 + 20 + 2 * 1 + r.fee) / r.o[1]);
+});

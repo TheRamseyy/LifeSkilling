@@ -64,6 +64,33 @@ function expand(list,opt){
   return {raw:raw,cur:cur,cat:cat,catUsed:catUsed,crafts:crafts,order:order,tree:tree};
 }
 
-var api={indexRecipes:indexRecipes,expand:expand,station:station,stationLabel:stationLabel,nodesFor:nodesFor,pretty:pretty};
+/* Cost to craft one of an item from your prices, including the crafting fee.
+   opt: {byOut, cats, prices, buy, pick}. Returns {each: number|null, missing: [item ids with no price]}.
+   An ingredient you marked as bought, or that nothing makes, uses its price; anything else is costed by crafting it. */
+function craftCost(id,opt,seen){
+  seen=seen||{};
+  var rs=opt.byOut[id],r=rs&&rs[0];
+  if(!r)return {each:null,missing:[id]};
+  if(seen[id])return {each:null,missing:[]};// recipe loop
+  seen[id]=1;
+  var total=r.fee||0,missing=[];
+  r.g.forEach(function(g){
+    var ing=g[1];
+    if(g[0]==="$"){return}// currencies such as Azoth are not priced in coin
+    if(g[0]==="g"){var mem=(opt.cats||{})[ing]||[],p=opt.pick&&opt.pick[ing];ing=p&&mem.indexOf(p)>=0?p:null;if(!ing){missing.push("any:"+g[1]);return}}
+    var c=unitPrice(ing,opt,seen);
+    if(c.each==null)missing=missing.concat(c.missing);else total+=c.each*g[2];
+  });
+  delete seen[id];
+  return {each:missing.length?null:total/r.o[1],missing:missing};
+}
+function unitPrice(id,opt,seen){
+  var p=opt.prices&&opt.prices[id],has=p!=null&&p!=="";
+  if(!opt.byOut[id]||(opt.buy&&opt.buy[id]))return has?{each:+p,missing:[]}:{each:null,missing:[id]};
+  var c=craftCost(id,opt,seen);
+  return c.each==null&&has?{each:+p,missing:[]}:c;// a craftable item with a price falls back to that price if its parts are not all priced
+}
+
+var api={craftCost:craftCost,indexRecipes:indexRecipes,expand:expand,station:station,stationLabel:stationLabel,nodesFor:nodesFor,pretty:pretty};
 if(typeof module!=="undefined"&&module.exports)module.exports=api;else root.NWCalc=api;
 })(this);

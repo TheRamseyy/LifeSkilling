@@ -249,3 +249,5 @@ fieldset.pick legend{padding:0 6px;font-weight:600}
 a.btn{display:inline-block;padding:10px 16px;border-radius:10px;background:var(--azoth);color:var(--night);font-weight:600;text-decoration:none}
 .big2{font:600 1.15rem var(--display);color:var(--azoth)}
 .seg{max-width:100%}
+.step .cost{grid-column:2/4;display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;font-size:.88rem}
+.step .cost b{color:var(--azoth)}

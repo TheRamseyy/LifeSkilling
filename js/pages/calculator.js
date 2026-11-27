@@ -19,7 +19,7 @@ var HTML=''+
   '<section class="card" id="flowcard" aria-labelledby="h-flow"><h2 id="h-flow">Recipe flow</h2><div id="flow"></div><p class="note">Read it left to right: gather or buy what is on the left, craft each step, and end with what you are making. Hover or tab to a card to see everything it feeds into and everything it needs.</p></section>'+
   '<nav class="jump" aria-label="Results sections"><a href="#rawcard">Materials</a><a href="#gathcard">Gathering</a><a href="#stepcard">Steps</a><a href="#skillcard">Skills</a><a href="#stationcard">Stations</a><a href="#treecard">Tree</a></nav>'+
   '<div class="res2"><div>'+
-  '<section class="card" id="rawcard" aria-labelledby="h-raw"><h2 id="h-raw">Raw materials to gather or buy</h2><div id="raw"></div></section>'+
+  '<section class="card" id="rawcard" aria-labelledby="h-raw"><h2 id="h-raw">Raw materials to gather or buy <span class="act"><button class="sm" id="copyraw" type="button">Copy shopping list</button></span></h2><div id="raw"></div></section>'+
   '<section class="card" id="gathcard" aria-labelledby="h-gath"><h2 id="h-gath">Gathering skills needed</h2><div id="gath"></div></section>'+
   '</div><div>'+
   '<section class="card" id="stepcard" aria-labelledby="h-steps"><h2 id="h-steps">Crafting steps (in order)</h2><div id="steps"></div></section>'+
@@ -64,7 +64,9 @@ App.page("craft/calculator",{title:"Crafting calculator",needsData:true,render:f
       h+='<div class="item"><span class="n">Any '+esc(nm(id))+' <span class="b warn">pick one</span><div class="muted">Choose which item you will use under Flexible materials to include it in gathering.</div></span><span class="c">'+fmt(c.cat[id])+'</span></div>';
     });
     Object.keys(c.cur).forEach(function(id){h+='<div class="item"><span class="n">'+esc(nm(id))+' <span class="b plain">currency</span></span><span class="c">'+fmt(c.cur[id])+'</span></div>'});
-    if(names.length)h+='<div class="total"><span>Total cost'+(pr<names.length?' <span class="muted">('+pr+' of '+names.length+' priced)</span>':'')+'</span><span id="tot">'+fmt(Math.round(t*100)/100)+'</span></div>';
+    if(names.length)h+='<div class="total"><span>Materials cost'+(pr<names.length?' <span class="muted">('+pr+' of '+names.length+' priced)</span>':'')+'</span><span id="tot">'+fmt(Math.round(t*100)/100)+'</span></div>';
+    var fees=c.order.reduce(function(s,id){return s+(c.crafts[id].r.fee||0)*c.crafts[id].times},0);
+    if(fees)h+='<div class="item"><span class="n muted">Crafting fees, before town tax</span><span class="c">'+fmt(fees)+'</span></div>';
     $("raw").innerHTML=h||'<div class="empty">Add something to craft to see materials.</div>';
     return names;
   }
@@ -97,10 +99,13 @@ App.page("craft/calculator",{title:"Crafting calculator",needsData:true,render:f
   }
   function renderSteps(c){
     $("steps").innerHTML=c.order.map(function(id,i){
-      var x=c.crafts[id],r=x.r;
+      var x=c.crafts[id],r=x.r,cc=NWCalc.craftCost(id,{byOut:byOut,cats:D.C,prices:S.prices,buy:S.buy,pick:S.pick}),mp=S.prices[id],has=mp!=null&&mp!=="";
+      var cost='<span class="cost"><input class="price" type="number" min="0" step="any" placeholder="market price" value="'+(has?esc(mp):"")+'" data-mp="'+esc(id)+'" aria-label="Market price of one '+esc(nm(id))+'">'+
+        (cc.each!=null?'<span>Costs <b>'+fmt(Math.round(cc.each*100)/100)+'</b> each to craft</span>'+(has?(+mp<cc.each?' <span class="b buy">buying saves '+fmt(Math.round((cc.each-mp)*100)/100)+' each</span>':' <span class="b raw">crafting saves '+fmt(Math.round((mp-cc.each)*100)/100)+' each</span>'):''):
+        '<span class="muted">Add prices for '+cc.missing.slice(0,3).map(function(m){return esc(/^any:/.test(m)?"any "+nm(m.slice(4)):nm(m))}).join(", ")+(cc.missing.length>3?' and '+(cc.missing.length-3)+' more':'')+' to see its cost</span>')+'</span>';
       return '<div class="step"><span class="no">'+(i+1)+'</span><span><b>'+App.itemLink(id)+'</b><div class="muted">'+r.g.map(function(g){return g[2]+" "+(g[0]==="g"?"any ":"")+esc(nm(g[1]))}).join(" + ")+(r.o[1]>1?" → makes "+r.o[1]:"")+'</div></span>'
         +'<span class="c">×'+fmt(x.times)+' <button class="sm" data-buy="'+esc(id)+'" title="Buy this instead of crafting it">Buy</button></span>'
-        +'<span class="meta">'+(r.s||[]).map(function(s,j){return (j?'<span class="muted">or</span> ':'')+'<span class="b craft">'+esc(stLabel(s))+'</span>'}).join(" ")+(r.t?'<span class="b plain">'+esc(r.t)+' '+(r.l||0)+'</span>':'')+'</span></div>';
+        +'<span class="meta">'+(r.s||[]).map(function(s,j){return (j?'<span class="muted">or</span> ':'')+'<span class="b craft">'+esc(stLabel(s))+'</span>'}).join(" ")+(r.t?'<span class="b plain">'+esc(r.t)+' '+(r.l||0)+'</span>':'')+(r.fee?'<span class="b plain">fee '+fmt(r.fee)+'</span>':'')+'</span>'+cost+'</div>';
     }).join("")||'<div class="empty">No crafting steps yet.</div>';
   }
   function renderSkills(c){
@@ -156,9 +161,19 @@ App.page("craft/calculator",{title:"Crafting calculator",needsData:true,render:f
   },{craftOnly:true});
   $("list").addEventListener("click",function(e){var b=e.target.closest("[data-rm]");if(!b)return;S.list.splice(+b.dataset.rm,1);App.save();render()});
   $("list").addEventListener("change",function(e){var i=e.target.dataset.q;if(i==null)return;S.list[+i].qty=Math.max(1,parseInt(e.target.value,10)||1);App.save();render()});
-  $("raw").addEventListener("input",function(e){var id=e.target.dataset.p;if(id==null)return;if(e.target.value==="")delete S.prices[id];else S.prices[id]=parseFloat(e.target.value)||0;App.save();totalOnly()});
+  $("raw").addEventListener("input",function(e){var id=e.target.dataset.p;if(id==null)return;if(e.target.value==="")delete S.prices[id];else S.prices[id]=parseFloat(e.target.value)||0;App.save();totalOnly();renderSteps(calc())});
   $("raw").addEventListener("click",function(e){var b=e.target.closest("[data-craft]");if(!b)return;delete S.buy[b.dataset.craft];App.save();render()});
   $("steps").addEventListener("click",function(e){var b=e.target.closest("[data-buy]");if(!b)return;S.buy[b.dataset.buy]=1;App.save();render()});
+  $("steps").addEventListener("change",function(e){
+    var id=e.target.dataset.mp;if(id==null)return;
+    if(e.target.value==="")delete S.prices[id];else S.prices[id]=parseFloat(e.target.value)||0;
+    App.save();render();
+    var el=$("steps").querySelector('[data-mp="'+CSS.escape(id)+'"]');if(el)el.focus();
+  });
+  $("copyraw").addEventListener("click",function(){
+    var c=calc(),b=this,txt=Object.keys(c.raw).sort(function(a,z){return c.raw[z]-c.raw[a]}).map(function(id){return c.raw[id]+" x "+nm(id)}).join("\n");
+    if(navigator.clipboard)navigator.clipboard.writeText(txt).then(function(){b.textContent="Copied"},function(){b.textContent="Copy failed"});
+  });
   $("flex").addEventListener("change",function(e){
     var id=e.target.dataset.cat;if(id==null)return;
     if(e.target.value)S.pick[id]=e.target.value;else delete S.pick[id];
