@@ -1,9 +1,9 @@
-// Saved in this browser only (localStorage): craft list, bought items, prices, "any X" picks, last page.
+// Saved in this browser only (localStorage): craft list, bought items, prices, "any X" picks, gathering levels, last page.
 (function(){
 "use strict";
 var KEY="nwcalc.v2",LAST="nwapp.lastRoute";
-var state=App.state={list:[],buy:{},prices:{},pick:{}};
-try{var d=JSON.parse(localStorage.getItem(KEY)||"null");if(d){state.list=d.list||[];state.buy=d.buy||{};state.prices=d.prices||{};state.pick=d.pick||{}}}catch(e){}
+var state=App.state={list:[],buy:{},prices:{},pick:{},levels:{}};
+try{var d=JSON.parse(localStorage.getItem(KEY)||"null");if(d){state.list=d.list||[];state.buy=d.buy||{};state.prices=d.prices||{};state.pick=d.pick||{};state.levels=d.levels||{}}}catch(e){}
 App.save=function(){try{localStorage.setItem(KEY,JSON.stringify(state))}catch(e){}};
 App.addToList=function(id,qty){
   var ex=state.list.filter(function(e){return e.id===id})[0];
