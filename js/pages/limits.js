@@ -7,5 +7,7 @@ App.page("data/limits",{title:"Known limits",render:function(root){
   '<li><b>Some names show as raw ids</b>, for example "FluxReagentsT5". About 300 categories have no display name in the game files.</li>'+
   '<li><b>Stations:</b> "Forge T2" means a tier 2 Forge or better. A few rare station names are best guesses.</li>'+
   '<li><b>Project Azoth may differ</b> from the official game. Treat everything as "from game files", not verified.</li>'+
+  '<li><b>Gear perk values are worked out</b> with the game&rsquo;s own scaling formula at each item&rsquo;s gear score. In game they may differ slightly. Fishing perks only say small, medium or large.</li>'+
+  '<li><b>Fishing spots</b> are not in the gathering data, so the gear page cannot list them by level.</li>'+
   '</ul></div>';
 }});

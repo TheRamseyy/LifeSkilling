@@ -18,7 +18,7 @@ A personal tool, shared with a few friends, that answers: "I want to craft X. Wh
 - Azoth may differ from the official game. Mark data as "from game files", not verified.
 
 ## Current state
-One app: index.html is the shell; css/, js/core (data loader, router, search, storage), js/pages (one file per page), js/lib/calc.js (calculator logic, no DOM, tested by tests/calc.test.js). Hash routes like #/craft/calculator and #/item/<id>. Calculator: search item, quantity, raw materials with "where to get it", crafting steps, skills by tradeskill, stations grouped, flexible-material picks, collapsible breakdown tree, optional prices. Logic: recursive expansion, crafts = ceil(qty / yield), shared materials summed, cycle and depth guard. Phase 1 is done.
+One app: index.html is the shell; css/, js/core (data loader, router, search, storage), js/pages (one file per page), js/lib/calc.js (calculator logic, no DOM, tested by tests/calc.test.js). Hash routes like #/craft/calculator and #/item/<id>. Calculator: search item, quantity, raw materials with "where to get it", crafting steps, skills by tradeskill, stations grouped, flexible-material picks, collapsible breakdown tree, optional prices. Logic: recursive expansion, crafts = ceil(qty / yield), shared materials summed, cycle and depth guard. Phase 1 is done. Phase 2 is done: #/gather/gear/<skill> (js/pages/gear.js) from data/gear.json built by tools/build_gear.py, tested by tests/gear.test.js.
 
 ## First task: redesign the calculator (nothing else yet)
 1. Breakdown tree: much better. Collapsible, shows quantity and number of crafts per node, raw materials visually distinct, easy to scan on a phone. Consider a clear top-down tree with expand/collapse all.

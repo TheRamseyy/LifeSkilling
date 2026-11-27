@@ -9,6 +9,7 @@ Everything comes from game files extracted by hand. It is not checked against Pr
 ## What it does now
 
 - **Crafting calculator**: add items, see every raw material, where to gather it, the crafting steps in order, skills and stations needed, and a breakdown tree.
+- **Gathering gear**: for Mining, Logging, Harvesting, Skinning and Fishing, the best tool and clothing, what to use at each skill level, and every tool and clothing piece with its perks.
 - **Item pages**: search any item or material at the top (or press `/`).
 - **Data pages**: About the data, Known limits, Changelog.
 
@@ -41,7 +42,7 @@ Your craft list, prices and choices are saved in your own browser only.
 With [Node.js](https://nodejs.org) installed, in this folder run:
 
 ```
-node --test tests/calc.test.js
+node --test tests/calc.test.js tests/gear.test.js
 ```
 
 All lines should say `pass`.
