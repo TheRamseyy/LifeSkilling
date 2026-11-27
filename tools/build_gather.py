@@ -1,5 +1,5 @@
-# Builds gather.json from extracted datatables.
-# Usage: python build_gather.py <datatables_dir> <en-us.json> <out_gather.json>
+# Builds data/gather.json from extracted datatables.
+# Usage: python tools/build_gather.py <datatables_dir> <en-us.json> data/gather.json
 import json,re,sys
 D,LOC,OUT=sys.argv[1].rstrip('/\\')+'/',sys.argv[2],sys.argv[3]
 L={k.lower():v for k,v in json.load(open(LOC,encoding='utf-8')).items()}
