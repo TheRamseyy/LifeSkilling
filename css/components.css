@@ -196,8 +196,8 @@ fieldset.pick legend{padding:0 6px;font-weight:600}
 
 /* Full item lists: a table on wide screens, stacked cards on phones */
 .gt{display:flex;flex-direction:column;gap:4px}
-.gt-h,.gt-r>summary{display:grid;grid-template-columns:minmax(180px,1.6fr) 120px 50px 80px 80px minmax(200px,2fr) minmax(150px,1.2fr);gap:12px;align-items:center;padding:8px 14px}
-.gt.nospd .gt-h,.gt.nospd .gt-r>summary{grid-template-columns:minmax(180px,1.6fr) 50px 80px 80px minmax(200px,2fr) minmax(150px,1.2fr)}
+.gt-h,.gt-r>summary,.gt-row{display:grid;grid-template-columns:minmax(180px,1.6fr) 120px 50px 80px 80px minmax(200px,2fr) minmax(150px,1.2fr);gap:12px;align-items:center;padding:8px 14px}
+.gt.nospd .gt-h,.gt.nospd .gt-r>summary,.gt.nospd .gt-row{grid-template-columns:minmax(180px,1.6fr) 50px 80px 80px minmax(200px,2fr) minmax(150px,1.2fr)}
 .gt-h{font-size:.78rem;color:var(--mute);padding-bottom:4px;border-bottom:1px solid var(--line)}
 .gt-r{border:1px solid rgba(61,74,112,.5);border-radius:12px;background:rgba(28,36,64,.4)}
 .gt-r>summary{cursor:pointer;list-style:none;font-size:.9rem}
@@ -210,9 +210,9 @@ fieldset.pick legend{padding:0 6px;font-weight:600}
 .gt-r[open]::details-content{height:auto}
 @media (max-width:900px){
   .gt-h{display:none}
-  .gt-r>summary,.gt.nospd .gt-r>summary{grid-template-columns:1fr 1fr 1fr;gap:4px 10px}
+  .gt-r>summary,.gt.nospd .gt-r>summary,.gt.nospd .gt-row{grid-template-columns:1fr 1fr 1fr;gap:4px 10px}
   .gt-n,.gt-p{grid-column:1/-1}
-  .gt-r>summary [data-l]::before{content:attr(data-l) " ";color:var(--mute);font-size:.75rem}
+  .gt-r [data-l]::before{content:attr(data-l) " ";color:var(--mute);font-size:.75rem}
 }
 .perks{margin:0 0 6px;padding-left:18px}.perks li{margin:3px 0}.perks b{font-weight:600}
 .spd{display:inline-flex;align-items:center;gap:6px}
@@ -247,3 +247,5 @@ fieldset.pick legend{padding:0 6px;font-weight:600}
 .mat b{color:var(--moss);font:600 .9rem var(--display)}
 .mat:hover{border-color:var(--moss)}
 a.btn{display:inline-block;padding:10px 16px;border-radius:10px;background:var(--azoth);color:var(--night);font-weight:600;text-decoration:none}
+.big2{font:600 1.15rem var(--display);color:var(--azoth)}
+.seg{max-width:100%}
