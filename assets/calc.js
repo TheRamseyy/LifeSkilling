@@ -237,7 +237,7 @@ function init(data){
 }
 // exposed for testing in the browser console only
 window.nwcalc={calc:calc,state:state,station:station};
-Promise.all(["recipes.json","names.json","cats.json"].map(function(f){return fetch(f).then(function(r){if(!r.ok)throw new Error(f);return r.json()})}))
- .then(function(d){return fetch("gather.json").then(function(r){return r.ok?r.json():null}).catch(function(){return null}).then(function(g){if(g){GN=g.n;GB=g.b}return d})})
+Promise.all(["recipes.json","names.json","cats.json"].map(function(f){return fetch("data/"+f).then(function(r){if(!r.ok)throw new Error(f);return r.json()})}))
+ .then(function(d){return fetch("data/gather.json").then(function(r){return r.ok?r.json():null}).catch(function(){return null}).then(function(g){if(g){GN=g.n;GB=g.b}return d})})
  .then(init).catch(function(e){$("stat").innerHTML='<span class="err">Could not load data ('+esc(e.message)+').</span>'});
 })();
