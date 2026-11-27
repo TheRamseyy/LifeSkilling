@@ -1,4 +1,5 @@
-# Builds data/gear.json: gathering tools and gathering clothing/jewellery for each gathering skill.
+# Builds data/gear.json: gathering tools and clothing for each gathering skill, plus crafting
+# clothing and the XP needed per level for each crafting skill.
 # Usage (from the repo folder):
 #   python tools/build_gear.py C:\nw\nw-buddy\dist\nw-data\live\datatables C:\nw\nw-buddy\dist\nw-data\live\localization\en-us.json data/gear.json
 import ast, glob, json, operator, os, re, sys
@@ -41,6 +42,8 @@ perks = {}
 for t in ("javelindata_perks.json", "javelindata_perks_2025.json"):
     for p in table(t):
         perks.setdefault(p["PerkID"], p)
+# Item rows sometimes spell perk ids with different capitals (WoodWorkerYield vs WoodworkerYield)
+canon = {k.lower(): k for k in perks}
 buckets = {b["PerkBucketID"]: b for b in table("javelindata_perkbuckets.json")}
 crafted = set()
 for f in glob.glob(os.path.join(D, "javelindata_crafting_*.json")):
@@ -106,7 +109,7 @@ def gear_score(r):
 
 
 def item_perks(r):
-    return [r[f"Perk{n}"] for n in range(1, 6) if r.get(f"Perk{n}")]
+    return [canon.get(r[f"Perk{n}"].lower(), r[f"Perk{n}"]) for n in range(1, 6) if r.get(f"Perk{n}")]
 
 
 def random_slots(r):
@@ -128,7 +131,27 @@ def skill_of(pid):
     return "Fishing" if pid.startswith("Fish") else None
 
 
-out = {"skills": {}, "levels": {}}
+# Crafting clothing: perk -> crafting skill it helps
+CRAFT_PERK = {"Arcanist": "Arcana", "Armorer": "Armoring", "Cook": "Cooking", "Engineer": "Engineering",
+              "Jeweler": "Jewelcrafting", "Weaponsmith": "Weaponsmithing", "StonecutterYield": "Stonecutting",
+              "LeatherworkerYield": "Leatherworking", "SmelterYield": "Smelting", "WeaverYield": "Weaving",
+              "WoodworkerYield": "Woodworking"}
+CRAFT_SKILLS = ["Arcana", "Armoring", "Cooking", "Engineering", "Furnishing", "Jewelcrafting", "Leatherworking",
+                "Smelting", "Stonecutting", "Weaponsmithing", "Weaving", "Woodworking"]
+
+
+def craft_skill_of(pid):
+    m = re.match(r"PerkID_Armor_([A-Za-z]+?)(_Faction)?$", pid)
+    return CRAFT_PERK.get(m.group(1)) if m else None
+
+
+out = {"skills": {}, "levels": {}, "crafting": {}}
+for s in CRAFT_SKILLS:
+    t = "javelindata_tradeskill%s.json" % s.lower()
+    rows = table(t) if os.path.exists(os.path.join(D, t)) else []
+    cost = {x["Level"]: x.get("InfluenceCost") or 0 for x in rows}
+    # xp[n] = crafting XP needed to go from level n to level n+1
+    out["crafting"][s] = {"xp": [cost.get(n + 1, 0) for n in range(250)], "wear": []}
 for s in SKILLS:
     out["skills"][s] = {"tools": [], "wear": []}
 
@@ -155,6 +178,11 @@ for iid, (src, r) in items.items():
         out["skills"][skill]["tools"].append(base)
         continue
     slot = next((label for c, label in SLOTS if c in cls), None)
+    allp = item_perks(r) + [canon.get(r[f"PerkSlot{n}"].lower(), r[f"PerkSlot{n}"]) for n in range(1, 6) if r.get(f"PerkSlot{n}")]
+    cp = [p for p in dict.fromkeys(allp) if p in perks and craft_skill_of(p)]
+    if slot and cp:
+        for cs in sorted({craft_skill_of(p) for p in cp}):
+            out["crafting"][cs]["wear"].append(dict(base, slot=slot, pk=[[p] + perk_text(p, gs) for p in cp if craft_skill_of(p) == cs]))
     mine = [p for p in item_perks(r) if p in perks and skill_of(p)]
     if not slot or not mine:
         continue
@@ -168,8 +196,11 @@ for s in SKILLS:
     if os.path.exists(os.path.join(D, t)):
         out["levels"][s] = {str(x["Level"]): x.get("GatheringEfficiency") or 0 for x in table(t) if x["Level"] % 50 == 0 and x["Level"] <= 250}
 
+for s in out["crafting"].values():
+    s["wear"].sort(key=lambda x: (x["slot"], -(x["pk"][0][3] or 0), -x["gs"], x["n"]))
 for s in out["skills"].values():
     s["tools"].sort(key=lambda x: (-x["sp"], -x["gs"], x["n"]))
     s["wear"].sort(key=lambda x: (x["slot"], -(x["pk"][0][3] or 0), -x["gs"], x["n"]))
 json.dump(out, open(OUT, "w", encoding="utf-8"), separators=(",", ":"), ensure_ascii=False)
 print({k: (len(v["tools"]), len(v["wear"])) for k, v in out["skills"].items()})
+print({k: len(v["wear"]) for k, v in out["crafting"].items()})
