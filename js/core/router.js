@@ -33,7 +33,7 @@ function go(){
   renderMenu(p.route);
   var sec=p.route.split("/")[0];if(!SEC[sec])sec="craft";
   document.body.dataset.sec=sec;document.body.style.removeProperty("--accent");App.sky.tint(SEC[sec][0],SEC[sec][1]);
-  if(!page){document.title="Not found · Aeternum Crafting";main.innerHTML='<h1>Page not found</h1><p>Nothing at this link. <a href="#/'+DEFAULT+'">Open the calculator</a>.</p>';return}
+  if(!page){document.title="Not found · Aeternum Crafting";main.innerHTML='<h1>Page not found</h1><p>Nothing at this link. If the link is new, the site may have just been updated: reload the page (Ctrl+F5, or pull down on a phone). Otherwise, <a href="#/'+DEFAULT+'">open the calculator</a>.</p>';return}
   App.lastRoute(location.hash.replace(/^#\//,""));
   document.title=(page.title||"")+" · Aeternum Crafting";
   var el=document.createElement("div");
