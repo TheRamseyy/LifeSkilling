@@ -49,6 +49,9 @@ for k, r in items.items():
     for c in ic or []:
         cats_all.setdefault(c, []).append(r.get("ItemID") or k)
 
+# Crafting XP per craft comes from the recipe's game event
+events = {e["EventID"]: e for e in json.load(open(os.path.join(D, "javelindata_gameevents.json"), encoding="utf-8"))}
+
 TYPE = {"Item": "i", "Category_Only": "g", "Currency": "$"}
 recipes, names, cats = [], {}, {}
 
@@ -83,6 +86,9 @@ for f in sorted(glob.glob(os.path.join(D, "javelindata_crafting_*.json"))):
             "tr": x.get("BaseTier"),
             "p": 1 if x.get("IsProcedural") else 0,
             "f": table,
+            "x": (events.get(x.get("GameEventID") or "") or {}).get("CategoricalProgressionReward") or 0,
+            "fee": x.get("CraftingFee") or 0,
+            "k": 1 if x.get("bKnownByDefault") else 0,
         })
 
 # Names in three passes, so an id that is both an item and a category keeps its item name
