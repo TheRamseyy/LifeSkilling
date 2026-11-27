@@ -13,7 +13,7 @@ App.findItems=function(q,opt){
 function meta(x){
   if(!x.craft)return "material";
   var r=App.data.byOut[x.id][0];
-  return [r.t,r.tr?"T"+r.tr:"",r.gs?"GS "+r.gs:""].filter(Boolean).join(" · ")||"craftable";
+  return [r.t,r.tr?"T"+r.tr:"",r.gs?"GS "+r.gs:""].filter(Boolean).join(", ")||"craftable";
 }
 // Wire an <input> and a results box. onPick(id) runs when the user chooses a result.
 App.attachSearch=function(input,box,onPick,opt){

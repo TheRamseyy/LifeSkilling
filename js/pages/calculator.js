@@ -5,7 +5,7 @@ var esc=App.esc,fmt=App.fmt,nm=App.nm,S=App.state;
 var openTree={};// tree path -> open (true/false), only for nodes the user toggled
 
 var HTML=''+
-'<h1>Crafting calculator</h1><p class="sub" id="stat"></p>'+
+'<h1>What are you crafting?</h1><p class="sub" id="stat"></p>'+
 '<div class="calc"><div class="col1">'+
   '<section class="card" aria-labelledby="h-search"><h2 id="h-search">Add something to craft</h2>'+
     '<div class="row"><input id="target" class="grow" placeholder="Search an item, e.g. Steel Ingot" autocomplete="off" aria-label="Search a craftable item">'+
@@ -16,6 +16,7 @@ var HTML=''+
   '<section class="card" id="flexcard" aria-labelledby="h-flex" hidden><h2 id="h-flex">Flexible materials</h2>'+
     '<p class="muted" style="margin:0 0 10px">Some recipes accept any item of a type. Pick the one you will use: it is added to your totals, steps and gathering.</p><div id="flex"></div></section>'+
 '</div><div>'+
+  '<section class="card" id="mapcard" aria-labelledby="h-map"><h2 id="h-map">Recipe map</h2><div id="map"></div><p class="note">Your list in the middle, each ring one step further back, raw materials on the outside. The same breakdown, as text, is in the tree below.</p></section>'+
   '<nav class="jump" aria-label="Results sections"><a href="#rawcard">Materials</a><a href="#gathcard">Gathering</a><a href="#stepcard">Steps</a><a href="#skillcard">Skills</a><a href="#stationcard">Stations</a><a href="#treecard">Tree</a></nav>'+
   '<section class="card" id="rawcard" aria-labelledby="h-raw"><h2 id="h-raw">Raw materials to gather or buy</h2><div id="raw"></div></section>'+
   '<section class="card" id="gathcard" aria-labelledby="h-gath"><h2 id="h-gath">Gathering skills needed</h2><div id="gath"></div></section>'+
@@ -33,7 +34,8 @@ App.page("craft/calculator",{title:"Crafting calculator",needsData:true,render:f
   // jump links scroll inside the page instead of changing the route
   $("rawcard").parentNode.querySelector(".jump").addEventListener("click",function(e){var a=e.target.closest("a");if(!a)return;e.preventDefault();var t=root.querySelector(a.getAttribute("href"));if(t)t.scrollIntoView()});
   S.list=S.list.filter(function(e){return byOut[e.id]||D.N[e.id]});
-  $("stat").textContent=fmt(D.R.length)+" recipes · "+fmt(D.craftCount)+" craftable items · from game files, not verified on Azoth";
+  $("stat").textContent=fmt(D.craftCount)+" craftable items from "+fmt(D.R.length)+" recipes, read from the game files and not yet checked on Azoth.";
+  var map=App.Constellation($("map"));
 
   function calc(){return NWCalc.expand(S.list,{byOut:byOut,cats:D.C,buy:S.buy,pick:S.pick})}
   function stLabel(s){return NWCalc.stationLabel(s)}
@@ -68,9 +70,9 @@ App.page("craft/calculator",{title:"Crafting calculator",needsData:true,render:f
     names.forEach(function(id){if(byOut[id])return;var gl=App.nodesFor(id);if(!gl.length)return;var best=gl[0],k=best.v[1];
       sk[k]=Math.max(sk[k]||0,best.v[2]);(sn[k]=sn[k]||[]).push({id:id,l:best.v[2],n:best.v[0]})});
     Object.keys(sk).sort().forEach(function(k){
-      h+='<section class="grp"><header>'+esc(k)+'<span class="c">level '+sk[k]+'</span></header><ul>'+sn[k].map(function(x){return '<li><span class="n">'+App.itemLink(x.id)+'</span><span class="muted">'+esc(x.n)+(x.l?' · lvl '+x.l:'')+'</span></li>'}).join("")+'</ul></section>';
+      h+='<section class="grp"><header>'+esc(k)+'<span class="c">level '+sk[k]+'</span></header><ul>'+sn[k].map(function(x){return '<li><span class="n">'+App.itemLink(x.id)+'</span><span class="muted">'+esc(x.n)+(x.l?', level '+x.l:'')+'</span></li>'}).join("")+'</ul></section>';
     });
-    $("gath").innerHTML=h?h+'<p class="note">Level is the lowest needed to reach every material, using the easiest node for each.</p>':'<div class="empty">No gathering needed.</div>';
+    $("gath").innerHTML=h?'<div class="grps">'+h+'</div><p class="note">Level is the lowest needed to reach every material, using the easiest node for each.</p>':'<div class="empty">No gathering needed.</div>';
   }
   function renderFlex(c){
     var ck=Object.keys(c.catUsed).sort(function(a,b){return nm(a).localeCompare(nm(b))}),h="";
@@ -105,7 +107,7 @@ App.page("craft/calculator",{title:"Crafting calculator",needsData:true,render:f
       var x=g[k];x.l.sort(function(a,b){return (c.crafts[b].r.l||0)-(c.crafts[a].r.l||0)});
       h+='<section class="grp"><header>'+esc(k)+'<span class="c">level '+x.max+'</span></header><ul>'+x.l.map(function(id){var r=c.crafts[id].r;return '<li><span class="n">'+App.itemLink(id)+'</span><span class="muted">lvl '+(r.l||0)+'</span>'+(r.s||[]).map(function(s){return '<span class="b craft">'+esc(stLabel(s))+'</span>'}).join("")+'</li>'}).join("")+'</ul></section>';
     });
-    $("skills").innerHTML=h||'<div class="empty">Nothing yet.</div>';
+    $("skills").innerHTML=h?'<div class="grps">'+h+'</div>':'<div class="empty">Nothing yet.</div>';
   }
   function renderStations(c){
     var g={},h="";
@@ -117,21 +119,22 @@ App.page("craft/calculator",{title:"Crafting calculator",needsData:true,render:f
       var x=g[k];
       h+='<section class="grp"><header>'+esc(x.name)+(x.tier?'<span class="c">tier '+x.tier+'+</span>':'')+'</header><ul>'+x.l.map(function(e){return '<li><span class="n">'+App.itemLink(e.id)+'</span><span class="c">×'+fmt(c.crafts[e.id].times)+'</span>'+(e.tier?'<span class="muted">T'+e.tier+'</span>':'')+(e.alt.length?'<span class="muted">or '+e.alt.map(function(s){return esc(stLabel(s))}).join(", ")+'</span>':'')+'</li>'}).join("")+'</ul></section>';
     });
-    $("stations").innerHTML=h?h+'<p class="note">Crafts listed in the order of the steps. "T2" means a tier 2 station or better.</p>':'<div class="empty">Nothing yet.</div>';
+    $("stations").innerHTML=h?'<div class="grps">'+h+'</div><p class="note">Crafts listed in the order of the steps. "T2" means a tier 2 station or better.</p>':'<div class="empty">Nothing yet.</div>';
   }
   function treeNode(n,depth){
     var label='<span class="tq">'+fmt(n.qty)+'×</span><span class="nm">'+esc(n.kind==="cat"?"Any "+nm(n.id):nm(n.id))+(n.via?' <span class="via">for any '+esc(nm(n.via))+'</span>':'')+'</span>';
     if(n.kind==="craft"){
       var open=n.path in openTree?openTree[n.path]:depth<2,st=(n.r.s||[])[0];
-      return '<li><details data-p="'+esc(n.path)+'"'+(open?' open':'')+'><summary>'+label+'<span class="b craft">craft ×'+fmt(n.times)+(st?' · '+esc(stLabel(st)):'')+'</span></summary><ul>'+n.kids.map(function(k){return treeNode(k,depth+1)}).join("")+'</ul></details></li>';
+      return '<li><details data-p="'+esc(n.path)+'"'+(open?' open':'')+'><summary>'+label+'<span class="b craft">craft ×'+fmt(n.times)+(st?' at '+esc(stLabel(st)):'')+'</span></summary><ul>'+n.kids.map(function(k){return treeNode(k,depth+1)}).join("")+'</ul></details></li>';
     }
     var b={raw:'<span class="b raw">gather / raw</span>',buy:'<span class="b buy">bought</span>',cur:'<span class="b plain">currency</span>',cat:'<span class="b warn">pick one</span>'}[n.kind];
-    if(n.kind==="raw"&&!App.nodesFor(n.id).length)b='<span class="b plain">raw · other source</span>';
+    if(n.kind==="raw"&&!App.nodesFor(n.id).length)b='<span class="b plain">raw, other source</span>';
     return '<li><div class="leaf '+n.kind+'">'+label+b+'</div></li>';
   }
   function renderTree(c){
     $("tree").innerHTML=c.tree.length?'<ul class="tree">'+c.tree.map(function(n){return treeNode(n,0)}).join("")+'</ul>':'<div class="empty">Nothing to show.</div>';
     $("treeact").hidden=!c.tree.length;
+    $("mapcard").hidden=!c.tree.length;if(c.tree.length)map.set(c.tree);
   }
   function render(){
     renderList();

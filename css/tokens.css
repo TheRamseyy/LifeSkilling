@@ -1,16 +1,46 @@
-/* Shared look for every page. Dark, warm "Aeternum" palette. */
+/* Design tokens. Theme: Azoth — luminous cyan magic over an Aeternum night sky.
+   Colour carries meaning everywhere: cyan = crafted, moss = gathered, lilac = chosen/bought, ember = needs attention. */
 :root{
-  --bg:#110e0a;--bg2:#17130e;--panel:#1d1812;--panel2:#262017;--line:#3b3124;--line2:#4d402e;
-  --ink:#f1e8d4;--mute:#b0a48b;--gold:#e0ad4c;--gold2:#f4ca74;--warn:#ef9a5a;
-  --raw:#8fd08a;--rawbg:#1b2a19;--craft:#e0ad4c;--craftbg:#2c2414;--cat:#9cc3f2;--catbg:#172434;--buy:#c8a6f0;
-  --r:12px;--focus:0 0 0 3px #f4ca74;
+  --night:#141A2E;      /* page */
+  --deep:#0F1426;       /* bottom of page gradient, wells */
+  --slate:#1C2440;      /* raised surfaces */
+  --slate2:#26304F;     /* inputs, hover */
+  --line:#2E3958;
+  --line2:#3D4A70;
+  --mist:#E6EAF5;       /* text */
+  --mute:#97A0BD;       /* secondary text (6.5:1 on night) */
+  --azoth:#5CE1E6;  --azoth-d:#1E5B66;  --azoth-bg:rgba(92,225,230,.09);
+  --moss:#A6D97A;   --moss-d:#46663A;   --moss-bg:rgba(166,217,122,.09);
+  --lilac:#B9A4FF;  --lilac-d:#5A4C8F;  --lilac-bg:rgba(185,164,255,.1);
+  --ember:#FF9F6B;  --ember-d:#86492C;  --ember-bg:rgba(255,159,107,.1);
+
+  --display:"Bahnschrift","DIN Alternate","Avenir Next Condensed","Roboto Condensed","Arial Narrow",system-ui,sans-serif;
+  --body:"Segoe UI Variable Text","Segoe UI",system-ui,-apple-system,Roboto,sans-serif;
+
+  --r-s:8px;--r:12px;--r-l:18px;
+  --ease:cubic-bezier(.2,.8,.2,1);
+  --focus:0 0 0 2px var(--night),0 0 0 4px var(--azoth);
+  interpolate-size:allow-keywords;   /* lets the tree animate open to its natural height */
 }
 *{box-sizing:border-box}
-html{scroll-behavior:smooth;scroll-padding-top:70px}
-@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
-body{margin:0;background:radial-gradient(1200px 500px at 50% -200px,#2a1f12,transparent),var(--bg);color:var(--ink);font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;min-height:100vh}
-a{color:var(--gold2)}
+html{scroll-behavior:smooth;scroll-padding-top:80px}
+body{
+  margin:0;color:var(--mist);font:16px/1.55 var(--body);min-height:100vh;
+  background:
+    radial-gradient(900px 600px at 85% -10%,rgba(92,225,230,.10),transparent 60%),
+    radial-gradient(700px 500px at -10% 30%,rgba(185,164,255,.08),transparent 60%),
+    linear-gradient(180deg,var(--night),var(--deep) 900px) fixed;
+  background-color:var(--deep);
+  -webkit-font-smoothing:antialiased;
+}
+a{color:var(--azoth);text-decoration-color:rgba(92,225,230,.35);text-underline-offset:3px}
+a:hover{text-decoration-color:var(--azoth)}
 :focus-visible{outline:none;box-shadow:var(--focus);border-radius:6px}
-.skip{position:absolute;left:-999px;top:8px;background:var(--gold);color:#000;padding:8px 12px;border-radius:8px;z-index:20}
+::selection{background:rgba(92,225,230,.3)}
+.skip{position:absolute;left:-999px;top:8px;background:var(--azoth);color:var(--night);padding:8px 12px;border-radius:8px;z-index:50;font-weight:600}
 .skip:focus{left:8px}
 
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *,*::before,*::after{transition-duration:.01ms!important;animation-duration:.01ms!important}
+}

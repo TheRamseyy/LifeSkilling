@@ -28,7 +28,13 @@ function go(){
   App.lastRoute(location.hash.replace(/^#\//,""));
   document.title=(page.title||"")+" · Aeternum Crafting";
   var el=document.createElement("div");
-  function show(){if(my!==seq)return;page.render(el,p.param);main.replaceChildren(el);window.scrollTo(0,0);var h=el.querySelector("h1");if(h&&App.routed){h.tabIndex=-1;h.focus({preventScroll:true})}App.routed=true}
+  function swap(){page.render(el,p.param);main.replaceChildren(el);window.scrollTo(0,0);var h=el.querySelector("h1");if(h&&App.routed){h.tabIndex=-1;h.focus({preventScroll:true})}}
+  function show(){
+    if(my!==seq)return;
+    // cross-fade between pages where the browser supports it; plain swap otherwise
+    if(App.routed&&document.startViewTransition&&!matchMedia("(prefers-reduced-motion: reduce)").matches)document.startViewTransition(swap);else swap();
+    App.routed=true;
+  }
   if(page.needsData&&!App.data){
     main.innerHTML='<p class="loading">Loading game data…</p>';
     App.loadData().then(show).catch(function(e){if(my===seq)main.innerHTML='<h1>Could not load data</h1><p class="err">'+esc(e.message)+' did not load. Check your connection and reload the page.</p>'});

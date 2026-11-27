@@ -8,6 +8,6 @@ App.fmt=function(n){return n.toLocaleString("en-GB")};
 App.nm=function(id){return (App.data&&App.data.N[id])||NWCalc.pretty(id)};
 App.dur=function(s,noUnit){if(s<90)return Math.round(s)+(noUnit?"":" s");var m=s/60;return (m<10?Math.round(m*10)/10:Math.round(m))+(noUnit?"":" min")};
 App.itemLink=function(id,label){return '<a href="#/item/'+encodeURIComponent(id)+'">'+App.esc(label||App.nm(id))+'</a>'};
-// One line per gathering node: "Name · Skill lvl N · respawn a–b · gather c"
-App.nodeLine=function(v){return '<b>'+App.esc(v[0])+'</b> · '+App.esc(v[1])+(v[2]?' lvl '+v[2]:'')+' · respawn '+App.dur(v[3],1)+'–'+App.dur(v[4])+' · gather '+App.dur(v[5])};
+// One line per gathering node, e.g. "Iron Vein, Mining, respawns in 8.4–12 min, takes 15 s to gather"
+App.nodeLine=function(v){return '<b>'+App.esc(v[0])+'</b>, '+App.esc(v[1])+(v[2]?' level '+v[2]:'')+', respawns in '+App.dur(v[3],1)+'–'+App.dur(v[4])+', takes '+App.dur(v[5])+' to gather'};
 })();
