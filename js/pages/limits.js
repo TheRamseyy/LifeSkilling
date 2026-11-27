@@ -8,6 +8,7 @@ App.page("data/limits",{title:"Known limits",render:function(root){
   '<li><b>Stations:</b> "Forge T2" means a tier 2 Forge or better. A few rare station names are best guesses.</li>'+
   '<li><b>Project Azoth may differ</b> from the official game. Treat everything as "from game files", not verified.</li>'+
   '<li><b>Gear perk values are worked out</b> with the game&rsquo;s own scaling formula at each item&rsquo;s gear score. In game they may differ slightly. Fishing perks only say small, medium or large.</li>'+
+  '<li><b>The run planner</b> picks kinds of node, not places or amounts. Some nodes list rarer materials that may only drop at higher skill levels; the planner shows everything a node can drop.</li>'+
   '<li><b>Fishing spots</b> are not in the gathering data, so the gear page cannot list them by level.</li>'+
   '</ul></div>';
 }});

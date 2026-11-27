@@ -10,6 +10,7 @@ Everything comes from game files extracted by hand. It is not checked against Pr
 
 - **Crafting calculator**: add items, see every raw material, where to gather it, the crafting steps in order, skills and stations needed, and a breakdown tree.
 - **Gathering gear**: for Mining, Logging, Harvesting, Skinning and Fishing, the best tool and clothing, what to use at each skill level, and every tool and clothing piece with its perks.
+- **Run planner**: from your craft list, the fewest kinds of node to visit for every material, grouped by skill and level, with your own gathering levels taken into account.
 - **Item pages**: search any item or material at the top (or press `/`).
 - **Data pages**: About the data, Known limits, Changelog.
 
@@ -31,7 +32,7 @@ Your craft list, prices and choices are saved in your own browser only.
 | `css/` | Colours (`tokens.css`), page frame (`layout.css`), building blocks (`components.css`). |
 | `js/core/` | Shared parts: data loading, page links, search, saving. |
 | `js/pages/` | One file per page. |
-| `js/lib/` | The calculator maths, with no page code, so it can be tested. |
+| `js/lib/` | The calculator maths and the run planner, with no page code, so they can be tested. |
 | `data/` | The game data as JSON. See [data/README.md](data/README.md). |
 | `tools/` | Python scripts that build the data from the game files. |
 | `tests/` | Checks of the calculator maths with real items. |
@@ -42,7 +43,7 @@ Your craft list, prices and choices are saved in your own browser only.
 With [Node.js](https://nodejs.org) installed, in this folder run:
 
 ```
-node --test tests/calc.test.js tests/gear.test.js
+node --test tests/calc.test.js tests/gear.test.js tests/plan.test.js
 ```
 
 All lines should say `pass`.
