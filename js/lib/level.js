@@ -21,6 +21,8 @@ function route(opt){
   var reagent={};Object.keys(opt.cats).forEach(function(k){if(/Reagent/i.test(k))opt.cats[k].forEach(function(m){reagent[m]=1})});
   opt.recipes.forEach(function(r){r.g.forEach(function(g){if(REAGENT.test(g[1]))reagent[g[1]]=1})});
   var buy=Object.assign({},reagent,opt.buy||{});
+  // every "any X" gets your choice, else the first (standard) item, including ones inside intermediate crafts
+  var pick={};Object.keys(opt.cats).forEach(function(k){var mem=opt.cats[k],p=opt.pick&&opt.pick[k];pick[k]=p&&mem.indexOf(p)>=0?p:mem[0]});
   var cands=opt.recipes.filter(function(r){
     return r.t===opt.skill&&r.x>0&&r.k&&r.o[0]&&!SKIP[r.f]&&r.g.length&&!r.g.some(function(g){return g[0]==="$"})
       &&r.c!=="Salvage"&&!LIMITED.test(r.n);
@@ -32,13 +34,12 @@ function route(opt){
     r.g.forEach(function(g){
       var id=g[1];
       if(g[0]==="g"){
-        var mem=(opt.cats[id]||[]),p=opt.pick&&opt.pick[id];
-        id=p&&mem.indexOf(p)>=0?p:mem[0];
+        id=pick[id];
         if(!id){ok=false;return}
       }
       list.push({id:id,qty:g[2]});
     });
-    var raw=ok?C.expand(list,{byOut:opt.byOut,cats:opt.cats,pick:opt.pick,buy:buy}).raw:{};
+    var raw=ok?C.expand(list,{byOut:opt.byOut,cats:opt.cats,pick:pick,buy:buy}).raw:{};
     var units=0,cost=0,priced=true,gatherable=ok;
     Object.keys(raw).forEach(function(id){
       units+=raw[id];

@@ -28,18 +28,24 @@ test("crafts give enough XP for each stage", () => {
   }
 });
 
-test("smelting starts on Charcoal and moves to Steel Ingot at 50", () => {
+test("smelting starts on Charcoal and moves to a 46 XP ingot at 50", () => {
   const r = L.route(opt("Smelting", "fast"));
   assert.strictEqual(r.steps[0].r.i, "CharcoalT1");
-  assert.strictEqual(r.steps[1].r.o[0], "IngotT3");
   assert.strictEqual(r.steps[1].from, 50);
+  assert.strictEqual(r.steps[1].r.x, 46);
+});
+
+test("wood inside Charcoal is counted, with or without a chosen wood", () => {
+  const a = L.route(opt("Smelting", "fast", { from: 0, to: 10 })), b = L.route(opt("Smelting", "fast", { from: 0, to: 10, pick: { Wood: "WoodT1" } }));
+  assert.ok(a.steps[0].raw.WoodT1 > 0);
+  assert.deepStrictEqual(a.steps[0].raw, b.steps[0].raw);
 });
 
 test("refining reagents are treated as bought, not broken down", () => {
   const r = L.route(opt("Smelting", "fast"));
-  const steel = r.steps.find((s) => s.r && s.r.o[0] === "IngotT3");
-  assert.ok(steel.raw.FluxT5 > 0);
-  assert.strictEqual(steel.raw.ReagentConverterT5, undefined);
+  const ingot = r.steps[1];
+  assert.ok(ingot.raw.FluxT5 > 0);
+  assert.strictEqual(ingot.raw.ReagentConverterT5, undefined);
 });
 
 test("cheapest never drops to a tiny-XP grind", () => {
