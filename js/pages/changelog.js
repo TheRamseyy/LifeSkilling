@@ -1,6 +1,7 @@
 // Data > Changelog. Add new entries at the top.
 App.page("data/changelog",{title:"Changelog",render:function(root){
   var log=[
+    ["27 Nov 2026",["More colour: each section has its own colour (Craft cyan, Gather green, Gear amber, Data rose) and every gathering and crafting skill has its own, used on its page and buttons.","A live aurora and starry sky behind every page, tinted to match where you are. It is light on battery and holds still if your device asks for less motion."]],
     ["27 Nov 2026",["New page: Level a crafting skill. Pick a skill and your levels; it shows what to craft at each stage, how many times, crafting fees, a shopping list and the clothing that helps. Choose the fastest or the cheapest route.","Calculator costs: each crafting step shows what one costs to make from your prices (fees included), and whether buying at the market price you enter would be cheaper. Crafting fees are totalled, and the shopping list can be copied."]],
     ["27 Nov 2026",["The 3D recipe map is replaced by a recipe flow that reads left to right, from what you gather to what you make.","Pages use the full width of wide screens.","Gathering gear page: an explanation of every column, gear new players can actually get at each level, and clear tables."]],
     ["27 Nov 2026",["New page: Run planner. It takes your craft list and picks the fewest kinds of node that can drop every material, grouped by skill and level.","Set your gathering levels and it leaves out nodes you cannot gather yet, and says which level you need."]],

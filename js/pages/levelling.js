@@ -11,7 +11,7 @@ App.page("craft/levelling",{title:"Level a crafting skill",needsData:true,render
   App.loadJSON("gear.json").then(function(G){
     S.lvl=S.lvl||{};
     var st=S.lvl[skill]=S.lvl[skill]||{from:0,to:250,mode:"fast"};
-    function draw(){root.innerHTML=html(skill,st,G)}
+    function draw(){App.accent(App.SKILL_COL[skill],"#B9A4FF");root.innerHTML=html(skill,st,G)}
     draw();
     root.addEventListener("change",function(e){
       var t=e.target,k=t.dataset&&t.dataset.f;if(!k)return;
@@ -34,7 +34,7 @@ function html(skill,st,G){
   var D=App.data,low=skill.toLowerCase();
   var r=NWLevel.route({recipes:D.R,byOut:D.byOut,cats:D.C,gather:D.G,xp:G.crafting[skill].xp,skill:skill,from:st.from,to:st.to,mode:st.mode,prices:S.prices,pick:S.pick});
   var h='<h1>Level '+esc(skill)+'</h1><p class="sub">What to craft at each stage to level '+esc(low)+', how many times, and everything it takes. Recipe XP and level XP come from the game files.</p>';
-  h+='<nav class="seg" aria-label="Crafting skill">'+SKILLS.map(function(s){return '<a href="#/craft/levelling/'+s.toLowerCase()+'"'+(s===skill?' aria-current="page"':'')+'>'+esc(s)+'</a>'}).join("")+'</nav>';
+  h+='<nav class="seg" aria-label="Crafting skill">'+SKILLS.map(function(s){return '<a style="--c:'+App.SKILL_COL[s]+'" href="#/craft/levelling/'+s.toLowerCase()+'"'+(s===skill?' aria-current="page"':'')+'>'+esc(s)+'</a>'}).join("")+'</nav>';
 
   h+='<div class="runs"><div class="col1">';
   h+='<section class="card glass" aria-labelledby="h-set"><h2 id="h-set">Your plan</h2><div class="lvls">'+

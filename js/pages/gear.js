@@ -57,12 +57,13 @@ App.page("gather/gear",{title:"Gathering gear",needsData:true,render:function(ro
 }});
 
 function draw(root,skill,G){
+  App.accent(App.SKILL_COL[skill],"#5CE1E6");
   var S=G.skills[skill],tools=S.tools,wear=S.wear,fish=skill==="Fishing",low=skill.toLowerCase();
   // the plain crafted tool of each tier sets the speed scale players compare against
   var scale=[1,2,3,4,5].map(function(t){return easyPick(tools,t,function(x){return x.src==="Crafted"&&!x.pk.length})}).filter(Boolean);
 
   var h='<h1>'+esc(skill)+' gear</h1><p class="sub">What to use for '+esc(low)+' as you level up, and every tool and clothing piece that helps. Read from the game files; perk values are worked out at each item\'s gear score.</p>';
-  h+='<nav class="seg" aria-label="Gathering skill">'+SKILLS.map(function(s){return '<a href="#/gather/gear/'+s.toLowerCase()+'"'+(s===skill?' aria-current="page"':'')+'>'+esc(s)+'</a>'}).join("")+'</nav>';
+  h+='<nav class="seg" aria-label="Gathering skill">'+SKILLS.map(function(s){return '<a style="--c:'+App.SKILL_COL[s]+'" href="#/gather/gear/'+s.toLowerCase()+'"'+(s===skill?' aria-current="page"':'')+'>'+esc(s)+'</a>'}).join("")+'</nav>';
 
   // How to read this page
   h+='<details class="guide card glass" open><summary><h2>How to read this page</h2></summary><dl>'+

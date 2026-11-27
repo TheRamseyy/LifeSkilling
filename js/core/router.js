@@ -4,6 +4,10 @@
 var esc=App.esc,DEFAULT="craft/calculator";
 // Pages register themselves: App.page("data/about", {title, needsData, render(el, param)})
 App.page=function(route,def){App.pages[route]=def};
+// Section colours (match --c-* in css/tokens.css) and a second colour for the sky
+var SEC={craft:["#5CE1E6","#B9A4FF"],gather:["#A6D97A","#5CE1E6"],gear:["#F2B45A","#FF8A5C"],data:["#F48FB1","#B9A4FF"]};
+// A page can give itself its own colour (a skill page, for example)
+App.accent=function(a,b){document.body.style.setProperty("--accent",a);App.sky.tint(a,b||a)};
 
 function parse(){
   var h=decodeURIComponent(location.hash.replace(/^#\/?/,"")),parts=h.split("/");
@@ -13,7 +17,7 @@ function parse(){
 }
 function renderMenu(cur){
   document.getElementById("side").innerHTML=App.menu.map(function(g){
-    return '<h3>'+esc(g.label)+'</h3>'+g.items.map(function(it){
+    return '<h3 style="--c:var(--c-'+g.label.toLowerCase()+')">'+esc(g.label)+'</h3>'+g.items.map(function(it){
       if(it.soon)return '<span class="soon" aria-disabled="true">'+esc(it.label)+'<small>soon</small></span>';
       return '<a href="#/'+it.route+'"'+(it.route===cur||cur.indexOf(it.route+"/")===0?' aria-current="page"':'')+'>'+esc(it.label)+'</a>';
     }).join("");
@@ -27,6 +31,8 @@ function go(){
   if(!location.hash||location.hash==="#"||location.hash==="#/"){location.replace("#/"+(App.lastRoute()||DEFAULT));return}
   var p=parse(),page=App.pages[p.route],main=document.getElementById("main"),my=++seq;
   renderMenu(p.route);
+  var sec=p.route.split("/")[0];if(!SEC[sec])sec="craft";
+  document.body.dataset.sec=sec;document.body.style.removeProperty("--accent");App.sky.tint(SEC[sec][0],SEC[sec][1]);
   if(!page){document.title="Not found · Aeternum Crafting";main.innerHTML='<h1>Page not found</h1><p>Nothing at this link. <a href="#/'+DEFAULT+'">Open the calculator</a>.</p>';return}
   App.lastRoute(location.hash.replace(/^#\//,""));
   document.title=(page.title||"")+" · Aeternum Crafting";
