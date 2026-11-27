@@ -2,7 +2,9 @@
 # clothing and the XP needed per level for each crafting skill.
 # Usage (from the repo folder):
 #   python tools/build_gear.py C:\nw\nw-buddy\dist\nw-data\live\datatables C:\nw\nw-buddy\dist\nw-data\live\localization\en-us.json data/gear.json
-import ast, glob, json, operator, os, re, sys
+import glob, json, os, re, sys
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from perkmath import fill, multiplier  # noqa: E402
 
 if len(sys.argv) != 4:
     sys.exit("usage: python tools/build_gear.py <datatables_dir> <en-us.json> <out gear.json>")
@@ -52,55 +54,12 @@ for f in glob.glob(os.path.join(D, "javelindata_crafting_*.json")):
             crafted.add(x["ItemID"].lower())
 
 
-def multiplier(scaling, gs):
-    """Perk strength at a gear score. Scaling is per gear score above 100,
-    either one number or segments like '0.003,550:0.00' (0.003 up to 550, then 0)."""
-    if scaling in (None, "") or not gs:
-        return 1.0
-    parts = str(scaling).split(",")
-    segs = [(100, float(parts[0]))] + [(float(a), float(b)) for a, b in (p.split(":") for p in parts[1:])]
-    m = 1.0
-    for i, (start, slope) in enumerate(segs):
-        end = segs[i + 1][0] if i + 1 < len(segs) else 10 ** 6
-        if gs > start:
-            m += (min(gs, end) - start) * slope
-    return m
-
-
-OPS = {ast.Add: operator.add, ast.Sub: operator.sub, ast.Mult: operator.mul, ast.Div: operator.truediv, ast.USub: operator.neg}
-
-
-def calc(expr):
-    """Arithmetic only (numbers and + - * /); anything else raises."""
-    def ev(n):
-        if isinstance(n, ast.Expression):
-            return ev(n.body)
-        if isinstance(n, ast.Constant) and isinstance(n.value, (int, float)):
-            return n.value
-        if isinstance(n, ast.BinOp) and type(n.op) in OPS:
-            return OPS[type(n.op)](ev(n.left), ev(n.right))
-        if isinstance(n, ast.UnaryOp) and type(n.op) in OPS:
-            return OPS[type(n.op)](ev(n.operand))
-        raise ValueError(expr)
-    return ev(ast.parse(expr, mode="eval"))
-
-
 def perk_text(pid, gs):
     """(name, description with numbers filled in for this gear score, first number or None)"""
     p = perks.get(pid)
     if not p:
         return None
-    m = multiplier(p.get("ScalingPerGearScore"), gs)
-    vals = []
-
-    def fill(mt):
-        try:
-            v = calc(mt.group(1).replace("{perkMultiplier}", repr(m)))
-        except (ValueError, SyntaxError, ZeroDivisionError):
-            return mt.group(0)
-        vals.append(v)
-        return ("%.1f" % v).rstrip("0").rstrip(".")
-    desc = re.sub(r"\{\[([^\]]*)\]\}", fill, loc(p.get("Description")) or "")
+    desc, vals = fill(loc(p.get("Description")), multiplier(p.get("ScalingPerGearScore"), gs))
     return [loc(p.get("DisplayName")) or pid, desc, round(vals[0], 2) if vals else None]
 
 
