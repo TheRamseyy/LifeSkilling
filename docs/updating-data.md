@@ -24,7 +24,7 @@ The first makes `recipes.json`, `names.json` and `cats.json`. The second makes
 
 ## After updating
 
-1. Run the checks: `node --test tests/calc.test.js tests/gear.test.js tests/plan.test.js`. If a number changed
+1. Run the checks: `node --test tests/calc.test.js tests/gear.test.js tests/plan.test.js tests/level.test.js`. If a number changed
    because the game changed, update the expected number in the test.
 2. Open the site locally (see [deploying.md](deploying.md)) and try a few items.
 3. Add a line to the changelog in `js/pages/changelog.js`.

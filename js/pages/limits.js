@@ -9,6 +9,8 @@ App.page("data/limits",{title:"Known limits",render:function(root){
   '<li><b>Project Azoth may differ</b> from the official game. Treat everything as "from game files", not verified.</li>'+
   '<li><b>Gear perk values are worked out</b> with the game&rsquo;s own scaling formula at each item&rsquo;s gear score. In game they may differ slightly. Fishing perks only say small, medium or large.</li>'+
   '<li><b>The run planner</b> picks kinds of node, not places or amounts. Some nodes list rarer materials that may only drop at higher skill levels; the planner shows everything a node can drop.</li>'+
+  '<li><b>Levelling routes</b> use the XP per craft and per level from the game files. XP boosts are not counted. Only recipes known by default are used, made from things you can gather plus refining reagents, which are counted as bought. Salvage research notes and gypsum recipes are left out because they need rare or daily-limited items.</li>'+
+  '<li><b>Costs</b> only use the prices you type in. There are no market prices in the game files. Crafting fees are shown before town tax.</li>'+
   '<li><b>Fishing spots</b> are not in the gathering data, so the gear page cannot list them by level.</li>'+
   '</ul></div>';
 }});
