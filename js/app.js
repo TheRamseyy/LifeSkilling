@@ -4,7 +4,7 @@
 "use strict";
 App.menu=[
   {label:"Craft",items:[{route:"craft/calculator",label:"Calculator"},{label:"Craft list",soon:1},{label:"Prices",soon:1}]},
-  {label:"Gather",items:[{label:"Materials and nodes",soon:1},{label:"Gathering gear by level",soon:1},{label:"Run planner",soon:1}]},
+  {label:"Gather",items:[{label:"Materials and nodes",soon:1},{route:"gather/gear",label:"Gathering gear by level"},{label:"Run planner",soon:1}]},
   {label:"Gear",items:[{label:"Weapons and attributes",soon:1}]},
   {label:"Data",items:[{route:"data/about",label:"About the data"},{route:"data/limits",label:"Known limits"},{route:"data/changelog",label:"Changelog"}]}
 ];

@@ -27,5 +27,11 @@ App.usedBy=function(id){
   if(!D.used){D.used={};D.R.forEach(function(r){if(r.o[0])r.g.forEach(function(g){var k=g[0]==="g"?"any:"+g[1]:g[1];(D.used[k]=D.used[k]||{})[r.o[0]]=1})})}
   return Object.keys(D.used[id]||{});
 };
+// Extra data files a single page needs, fetched once: App.loadJSON("gear.json")
+var extra={};
+App.loadJSON=function(f){
+  if(!extra[f]){extra[f]=get(f);extra[f].catch(function(){delete extra[f]})}
+  return extra[f];
+};
 App.nodesFor=function(id){return NWCalc.nodesFor(id,App.data.G)};
 })();

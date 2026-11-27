@@ -147,3 +147,58 @@ fieldset.pick legend{padding:0 6px;font-weight:600}
 .links a:hover{border-color:var(--azoth);color:var(--azoth)}
 .item-top{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:30px;align-items:start}
 @media (max-width:980px){.item-top{grid-template-columns:1fr}}
+
+/* Skill switch */
+.seg{display:flex;gap:4px;flex-wrap:wrap;margin:0 0 34px;padding:4px;border-radius:14px;background:rgba(15,20,38,.6);border:1px solid var(--line);width:fit-content;max-width:100%}
+.seg a{padding:7px 16px;border-radius:10px;text-decoration:none;color:var(--mute);font:600 .95rem var(--display);font-stretch:90%;transition:color .2s,background .2s}
+.seg a:hover{color:var(--mist);background:var(--slate2)}
+.seg a[aria-current=page]{color:var(--night);background:var(--moss);box-shadow:0 0 18px rgba(166,217,122,.35)}
+
+/* Best in slot: a character screen. Jewellery left, worn pieces down the middle, tool right. */
+.doll{position:relative;display:grid;gap:12px;grid-template-columns:1fr 1.15fr 1fr;
+  grid-template-areas:"amulet head tool" "ring chest tool" "earring hands ." ". legs ." ". feet .";
+  padding:20px;border-radius:var(--r-l);background:radial-gradient(60% 80% at 50% 40%,rgba(166,217,122,.08),transparent 70%),rgba(15,20,38,.5);border:1px solid rgba(61,74,112,.45)}
+.doll .core{position:absolute;left:50%;top:28px;bottom:28px;width:2px;transform:translateX(-50%);background:linear-gradient(var(--moss),transparent);opacity:.35;z-index:0}
+.slot{position:relative;z-index:1;display:flex;flex-direction:column;gap:3px;padding:12px 14px;border-radius:14px;background:rgba(28,36,64,.88);border:1px solid rgba(166,217,122,.22);box-shadow:inset 0 1px 0 rgba(230,234,245,.05)}
+.slot.none{background:rgba(28,36,64,.45);border-style:dashed;border-color:var(--line)}
+.slot .sl{font-size:.78rem;color:var(--mute)}
+.slot .sn{font:600 1rem/1.25 var(--display);font-stretch:90%}
+.slot .sn a{color:var(--mist);text-decoration:none}.slot .sn a:hover{color:var(--moss)}
+.slot .sv{color:var(--moss);font-size:.9rem;font-weight:600}
+.s-head{grid-area:head}.s-chest{grid-area:chest}.s-hands{grid-area:hands}.s-legs{grid-area:legs}.s-feet{grid-area:feet}
+.s-amulet{grid-area:amulet}.s-ring{grid-area:ring}.s-earring{grid-area:earring}
+.s-tool{grid-area:tool;border-color:rgba(92,225,230,.4);background:linear-gradient(180deg,rgba(92,225,230,.12),rgba(28,36,64,.9))}
+.s-tool .sv{color:var(--azoth);font:600 1.6rem var(--display)}
+@media (max-width:700px){
+  .doll{grid-template-columns:1fr 1fr;grid-template-areas:"tool tool" "head chest" "hands legs" "feet amulet" "ring earring";padding:12px}
+  .doll .core{display:none}
+}
+
+/* Level bands: a vertical track */
+.bands{list-style:none;margin:0;padding:0;position:relative}
+.bands::before{content:"";position:absolute;left:47px;top:12px;bottom:12px;width:2px;background:linear-gradient(var(--moss),var(--azoth));opacity:.4}
+.band{display:grid;grid-template-columns:96px 1fr;gap:18px;padding:12px 0}
+.band .lvl{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;width:96px;height:64px;border-radius:14px;background:var(--slate);border:1px solid rgba(166,217,122,.3);z-index:1}
+.band .lvl span{font-size:.72rem;color:var(--mute)}
+.band .lvl b{font:600 1.15rem var(--display);font-stretch:85%;color:var(--moss)}
+.band .body p{margin:0 0 6px;line-height:1.5}
+.band .k{display:inline-block;min-width:6.5em;color:var(--mute);font-size:.85rem}
+@media (max-width:600px){.band{grid-template-columns:1fr;gap:8px}.bands::before{display:none}.band .lvl{flex-direction:row;gap:8px;width:auto;height:auto;padding:6px 12px;justify-content:flex-start}.band .k{display:block}}
+
+/* Full item lists */
+.glist{display:flex;flex-direction:column;gap:6px}
+.gi{border:1px solid rgba(61,74,112,.5);border-radius:12px;background:rgba(28,36,64,.4)}
+.gi>summary{display:flex;align-items:center;gap:8px 14px;flex-wrap:wrap;padding:10px 14px;cursor:pointer;list-style:none}
+.gi>summary::-webkit-details-marker{display:none}
+.gi>summary:hover{background:rgba(38,48,79,.5);border-radius:12px}
+.gi .n{flex:1;min-width:10em;font-weight:500}
+.gi .val{color:var(--moss);font-size:.88rem}
+.gi .gd{padding:0 14px 12px}
+.gi::details-content{height:0;overflow:clip;transition:height .25s var(--ease),content-visibility .25s allow-discrete}
+.gi[open]::details-content{height:auto}
+.perks{margin:0 0 6px;padding-left:18px}.perks li{margin:3px 0}.perks b{font-weight:600}
+.spd{display:inline-flex;align-items:center;gap:6px;width:110px}
+.spd i{display:block;height:6px;border-radius:3px;background:linear-gradient(90deg,var(--azoth-d),var(--azoth));box-shadow:0 0 8px rgba(92,225,230,.4)}
+.spd b{font:600 .9rem var(--display);color:var(--azoth)}
+.slot-h{font:600 1rem var(--display);font-stretch:90%;color:var(--mute);margin:20px 0 8px}
+.s-tool .perks{margin:8px 0 0;font-size:.86rem}

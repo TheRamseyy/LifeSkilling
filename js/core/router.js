@@ -7,17 +7,20 @@ App.page=function(route,def){App.pages[route]=def};
 
 function parse(){
   var h=decodeURIComponent(location.hash.replace(/^#\/?/,"")),parts=h.split("/");
-  if(App.pages[h])return {route:h,param:""};
-  if(App.pages[parts[0]])return {route:parts[0],param:parts.slice(1).join("/")};// e.g. item/<id>
+  // longest registered page that starts the link wins; the rest is the page's parameter (item/<id>, gather/gear/<skill>)
+  for(var i=parts.length;i>0;i--){var k=parts.slice(0,i).join("/");if(App.pages[k])return {route:k,param:parts.slice(i).join("/")}}
   return {route:h,param:""};
 }
 function renderMenu(cur){
   document.getElementById("side").innerHTML=App.menu.map(function(g){
     return '<h3>'+esc(g.label)+'</h3>'+g.items.map(function(it){
       if(it.soon)return '<span class="soon" aria-disabled="true">'+esc(it.label)+'<small>soon</small></span>';
-      return '<a href="#/'+it.route+'"'+(it.route===cur?' aria-current="page"':'')+'>'+esc(it.label)+'</a>';
+      return '<a href="#/'+it.route+'"'+(it.route===cur||cur.indexOf(it.route+"/")===0?' aria-current="page"':'')+'>'+esc(it.label)+'</a>';
     }).join("");
   }).join("")+'<p class="side-foot">Data from game files, not verified on Azoth.</p>';
+  // phones: the menu is a sideways strip, so bring the current page into view
+  var side=document.getElementById("side"),cur2=side.querySelector("[aria-current]");
+  if(cur2&&side.scrollWidth>side.clientWidth)side.scrollLeft=cur2.offsetLeft-side.clientWidth/2+cur2.offsetWidth/2;
 }
 var seq=0;
 function go(){
