@@ -29,7 +29,7 @@ App.boostTable=function(all,skill){
       var lasts=b.dur?(b.dur>=3600?Math.round(b.dur/360)/10+" h":Math.round(b.dur/60)+" min"):(b.src==="Territory"?"3 days":"While active");
       var note=b.note?App.esc(b.note)+(b.k==="luck"?App.unsure("The buff's description says yield, but its data value is luck points ("+b.v*100+" = "+b.v+"%). Which one the game applies is not confirmed."):""):"";
       var name=(App.data&&(App.data.byOut[b.id]||App.data.N[b.id]))?App.itemLink(b.id,b.n):App.esc(b.n);
-      return '<div class="gt-r"><div class="gt-row" role="row"><span class="gt-n" role="cell">'+name+'</span><span role="cell" data-l="Type">'+App.esc(SRC[b.src]||b.src)+'</span><span class="gt-p" role="cell"><b>'+App.esc(val)+'</b></span><span role="cell" data-l="Lasts">'+lasts+'</span><span role="cell" class="muted">'+note+'</span></div></div>';
+      return '<div class="gt-r"><div class="gt-row" role="row"><span class="gt-n" role="cell">'+name+'</span><span role="cell" data-l="Type">'+App.esc(SRC[b.src]||b.src)+'</span><span class="gt-p" role="cell"><b>'+App.esc(val)+'</b></span><span role="cell" data-l="Lasts">'+lasts+'</span><span role="cell" class="muted gt-note">'+note+'</span></div></div>';
     }).join("")+'</div>';
 };
 // "Any X" ingredients: the item you chose, else the standard (first) item
