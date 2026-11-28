@@ -3,7 +3,63 @@
 "use strict";
 var esc=App.esc;
 var TYPES=[["Mining","Pickaxe"],["Logging","Logging axe"],["Harvesting","Sickle"],["Skinning","Skinning knife"],["Fishing","Fishing pole"]];
-var picked=["","",""];// tools chosen for comparison
+var picked=(App.state.cmp&&App.state.cmp.length===3)?App.state.cmp.slice():["","",""];// tools chosen for comparison (saved)
+function save(){App.state.cmp=picked.slice();App.save()}
+function top3(tools){return tools.slice().sort(function(a,b){return b.sp-a.sp||b.pk.length-a.pk.length||b.gs-a.gs}).slice(0,3)}
+function skillOf(G,id){for(var i=0;i<TYPES.length;i++){if(G.skills[TYPES[i][0]].tools.some(function(t){return t.id===id}))return TYPES[i][0]}return null}
+function find(G,id){var s=skillOf(G,id);return s?G.skills[s].tools.filter(function(t){return t.id===id})[0]:null}
+
+// Compare up to three tools: slots, quick presets, bar rows with the winner marked, and a perk-by-perk grid
+function compareHtml(G){
+  var h='<section class="card cmpbox" aria-labelledby="h-cmp" style="margin-top:28px"><h2 id="h-cmp">Compare tools</h2>';
+  h+='<div class="presets"><span class="muted">Quick picks:</span>'+TYPES.map(function(T){var c=App.SKILL_COL[T[0]];return '<span class="pgroup" style="--a:'+c+'"><b>'+esc(T[1])+'</b><button type="button" class="sm" data-preset="ladder" data-skill="'+T[0]+'">Crafted T3–T5</button><button type="button" class="sm" data-preset="top" data-skill="'+T[0]+'">Top 3</button></span>'}).join("")+'</div>';
+  var ts=picked.map(function(id){return id?find(G,id):null});
+  h+='<div class="slots">'+ts.map(function(t,i){
+    var sk=t?skillOf(G,t.id):null,col=sk?App.SKILL_COL[sk]:"var(--line2)";
+    var sel='<select data-cmp="'+i+'" aria-label="Tool '+(i+1)+'"><option value="">Choose a tool…</option>'+TYPES.map(function(T){return '<optgroup label="'+esc(T[1])+'">'+G.skills[T[0]].tools.map(function(o){return '<option value="'+esc(o.id)+'"'+(t&&o.id===t.id?' selected':'')+'>'+esc(o.n)+' (T'+o.tr+', GS '+o.gs+')</option>'}).join("")+'</optgroup>'}).join("")+'</select>';
+    return '<div class="slotc'+(t?'':' empty')+'" style="--a:'+col+'"><span class="sl">Tool '+(i+1)+(t?' <button type="button" class="sm clr" data-clear="'+i+'" aria-label="Remove tool '+(i+1)+'">✕</button>':'')+'</span>'+
+      (t?'<b class="sn">'+App.itemLink(t.id,t.n)+'</b><span class="muted">'+esc(sk)+', T'+t.tr+', GS '+t.gs+'</span>':'<span class="muted">Empty</span>')+sel+'</div>';
+  }).join("")+'</div>';
+  var have=ts.filter(Boolean);
+  if(!have.length)return h+'<p class="muted">Pick tools above, or use a quick pick.</p></section>';
+
+  // number rows drawn as bars; "low" means lower is better
+  function rec(t){var r=App.data.byOut[t.id]&&App.data.byOut[t.id][0];return r}
+  var ROWS=[["Gathering speed",function(t){return t.sp},0,"How fast it gathers. Higher is faster."],["Gear score",function(t){return t.gs},0,"Higher makes its perks stronger."],
+    ["Listed perks",function(t){return t.pk.length},0,"Perks it always comes with."],["Random perk slots",function(t){return t.rs||0},0,"Extra perks rolled when made or dropped."],
+    ["Equip level",function(t){return t.lv||0},1,"Character level needed. Lower is easier."]];
+  h+='<div class="cbars">'+ROWS.map(function(r){
+    var vals=ts.map(function(t){return t?r[1](t):null}),nums=vals.filter(function(v){return v!=null});
+    var best=r[2]?Math.min.apply(null,nums):Math.max.apply(null,nums),top=Math.max.apply(null,nums)||1,tie=nums.every(function(v){return v===nums[0]});
+    return '<div class="cbar"><div class="cbl"><b>'+r[0]+'</b><span class="muted">'+r[3]+'</span></div>'+ts.map(function(t,i){
+      if(!t)return '<div class="cbv empty"></div>';
+      var v=vals[i],col=App.SKILL_COL[skillOf(G,t.id)];
+      return '<div class="cbv'+(!tie&&v===best?' win':'')+'" style="--a:'+col+'"><i style="width:'+Math.max(3,Math.round((r[2]?(top?(top-v+1)/(top+1):1):v/top)*100))+'%"></i><b>'+(r[0]==="Equip level"&&!v?"Any":v)+'</b>'+(!tie&&v===best?'<span class="crown" title="Best">★</span>':'')+'</div>';
+    }).join("")+'</div>';
+  }).join("")+'</div>';
+  // speed difference in plain words
+  if(have.length>1&&!have.every(function(t){return t.sp===have[0].sp})){
+    var f=have.slice().sort(function(a,b){return b.sp-a.sp}),slow=f[f.length-1];
+    h+='<p class="note">'+esc(f[0].n)+' gathers '+Math.round((f[0].sp/slow.sp-1)*100)+'% faster than '+esc(slow.n)+', going by the speed value'+App.unsure("Speed is the game’s gathering efficiency value. That a higher value means proportionally faster gathering is the usual reading, not confirmed.")+'.</p>';
+  }
+  // perk grid: every perk any of them has, and which tool has it (or can roll it)
+  var names=[];have.forEach(function(t){t.pk.forEach(function(p){if(names.indexOf(p[1])<0)names.push(p[1])});(t.pool||[]).forEach(function(n){if(names.indexOf(n)<0)names.push(n)})});
+  if(names.length){
+    h+='<h3 class="slot-h">Perks</h3><div style="overflow-x:auto"><table class="cmp pgrid"><tr><th>Perk</th>'+ts.map(function(t){return '<td>'+(t?'<b>'+esc(t.n)+'</b>':'')+'</td>'}).join("")+'</tr>'+names.map(function(n){
+      return '<tr><th>'+esc(n)+'</th>'+ts.map(function(t){
+        if(!t)return '<td></td>';
+        var p=t.pk.filter(function(p){return p[1]===n})[0];
+        if(p)return '<td class="has">✔ '+(p[3]!=null?'<b>+'+p[3]+(/%/.test(p[2])?'%':'')+'</b>':'listed')+'</td>';
+        return (t.pool||[]).indexOf(n)>=0?'<td class="may">can roll</td>':'<td class="muted">—</td>';
+      }).join("")+'</tr>';
+    }).join("")+'</table></div><p class="note">✔ means the tool always has the perk (value at its gear score). "Can roll" means it may get it in a random perk slot.</p>';
+  }
+  h+='<h3 class="slot-h">How to get them</h3><div class="slots">'+ts.map(function(t){
+    if(!t)return '<div></div>';var r=rec(t);
+    return '<div class="muted">'+esc(t.src)+(r&&r.t?', '+esc(r.t)+' '+(r.l||0):'')+(t.bop?', bound':'')+'</div>';
+  }).join("")+'</div>';
+  return h+'</section>';
+}
 
 // Tabs shared by the Gear pages
 App.gearNav=function(cur){
@@ -31,24 +87,18 @@ App.page("gear/tools",{title:"Gathering tools",needsData:true,render:function(ro
           '<p class="est"><a href="#/gather/gear/'+skill.toLowerCase()+'">'+esc(skill)+' gear by level</a></p></article>';
       }).join("")+'</div>';
 
-      // Compare any three tools
-      var all=[];TYPES.forEach(function(T){G.skills[T[0]].tools.forEach(function(t){all.push([T,t])})});
-      h+='<section class="card" aria-labelledby="h-cmp" style="margin-top:28px"><h2 id="h-cmp">Compare tools</h2><div class="row">'+picked.map(function(v,i){
-        return '<select data-cmp="'+i+'" aria-label="Tool '+(i+1)+'"><option value="">Choose a tool…</option>'+TYPES.map(function(T){return '<optgroup label="'+esc(T[1])+'">'+G.skills[T[0]].tools.map(function(t){return '<option value="'+esc(t.id)+'"'+(t.id===v?' selected':'')+'>'+esc(t.n)+' (T'+t.tr+', GS '+t.gs+')</option>'}).join("")+'</optgroup>'}).join("")+'</select>';
-      }).join("")+'</div>';
-      var ts=picked.map(function(id){var m=all.filter(function(x){return x[1].id===id})[0];return m&&m[1]}).filter(Boolean);
-      if(ts.length){
-        var rows=[["Speed",function(t){return t.sp},1],["Tier",function(t){return "T"+t.tr}],["Gear score",function(t){return t.gs},1],["Equip level",function(t){return t.lv||"Any"}],["Perks",perkList],["How to get it",function(t){var r=App.data.byOut[t.id]&&App.data.byOut[t.id][0];return esc(t.src)+(r&&r.t?' ('+esc(r.t)+' '+(r.l||0)+')':'')+(t.bop?', bound':'')}]];
-        h+='<div style="overflow-x:auto;margin-top:12px"><table class="cmp"><tr><th></th>'+ts.map(function(t){return '<td><b>'+App.itemLink(t.id,t.n)+'</b></td>'}).join("")+'</tr>'+rows.map(function(r){
-          var vals=ts.map(r[1]),best=r[2]?Math.max.apply(null,vals):null;
-          return '<tr><th>'+r[0]+'</th>'+vals.map(function(v){return '<td'+(best!=null&&v===best&&ts.length>1?' class="best"':'')+'>'+v+'</td>'}).join("")+'</tr>';
-        }).join("")+'</table></div>';
-      }else h+='<p class="muted" style="margin-top:10px">Choose up to three tools to see them side by side.</p>';
-      h+='</section>';
+      h+=compareHtml(G);
       root.innerHTML=h;
     }
     draw();
-    root.addEventListener("change",function(e){var i=e.target.dataset&&e.target.dataset.cmp;if(i==null)return;picked[+i]=e.target.value;draw();root.querySelector('[data-cmp="'+i+'"]').focus()});
+    root.addEventListener("change",function(e){var i=e.target.dataset&&e.target.dataset.cmp;if(i==null)return;picked[+i]=e.target.value;save();draw();var el=root.querySelector('[data-cmp="'+i+'"]');if(el)el.focus()});
+    root.addEventListener("click",function(e){
+      var x=e.target.closest("[data-clear]");if(x){picked[+x.dataset.clear]="";save();draw();return}
+      var p=e.target.closest("[data-preset]");if(!p)return;
+      var tools=G.skills[p.dataset.skill].tools;
+      picked=(p.dataset.preset==="ladder"?[3,4,5].map(function(t){var q=plain(tools,t);return q?q.id:""}):top3(tools).map(function(t){return t.id}));
+      save();draw();var h2=root.querySelector("#h-cmp");if(h2)h2.scrollIntoView({block:"start"});
+    });
   }).catch(function(e){root.innerHTML='<h1>Gathering tools</h1><p class="err">Data did not load ('+esc(e.message)+'). Reload the page.</p>'});
 }});
 })();
