@@ -6,7 +6,7 @@ App.page("item",{title:"Item",needsData:true,render:function(root,id){
   var D=App.data,rs=D.byOut[id],r=rs&&rs[0],known=r||D.N[id]||App.usedBy(id).length;
   document.title=nm(id)+" · Aeternum Crafting";
   if(!id||!known){root.innerHTML='<h1>Item not found</h1><p>No item with the id "'+esc(id)+'" in the game data. Try the search box at the top.</p>';return}
-  var h='<h1>'+esc(nm(id))+'</h1><div class="facts">';
+  var h='<h1>'+esc(nm(id))+' '+App.saveButton(id)+'</h1><div class="facts">';
   if(r)h+='<span class="b craft">craftable</span>'+(r.t?'<span class="b plain">'+esc(r.t)+' '+(r.l||0)+'</span>':'')+(r.s||[]).map(function(s){return '<span class="b craft">'+esc(NWCalc.stationLabel(s))+'</span>'}).join("")+(r.tr?'<span class="b plain">Tier '+r.tr+'</span>':'')+(r.gs?'<span class="b plain">GS '+r.gs+'</span>':'');
   else h+='<span class="b raw">material</span>';
   h+='<span class="b plain">id '+esc(id)+'</span></div>';

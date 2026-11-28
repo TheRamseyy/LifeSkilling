@@ -2,6 +2,7 @@
 App.page("data/changelog",{title:"Changelog",render:function(root){
   var log=[
     ["28 Nov 2026",["The recipe chart is replaced by a crafting plan you read top to bottom: what to gather and buy (grouped by skill), then each crafting step as cards showing what to make, how many crafts, where, and what it needs. No more lines; hover what a card needs to see where it comes from.","Refining reagents (flux, sandpaper, tannin, solvent, wireweave) now count as bought by default, which also fixes a loop where Obsidian Flux and Obsidian Sandpaper each needed the other. Press “Craft it” to make them yourself."]],
+    ["28 Nov 2026",["Saved recipes: press ☆ Save on any item (calculator or item page) and find it under Craft > Saved recipes, ready to add to the calculator. Kept on your device; Sign in with Discord (once set up) keeps them on every device."]],
     ["28 Nov 2026",["Fixed: the attribute + and − buttons are centred again (they were picking up the calculator’s step layout)."]],
     ["28 Nov 2026",["New page: Gather > Where gear drops. Every gathering tool, clothing piece and bag that can drop, with the creature level range, the best zones to farm, example creatures, and chests or events. Gear page rows link to it."]],
     ["28 Nov 2026",["New background: a moonlit night with a cratered moon, moonbeams, clouds, three mountain ridges in mist and drifting Azoth lights. The aurora, mist and lights still take the colour of the page you are on."]],

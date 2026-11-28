@@ -452,3 +452,22 @@ table.pgrid td.has{color:var(--c-gather)}table.pgrid td.may{color:var(--cat)}
 .dz small{opacity:.7}
 .dcre{columns:2 220px;margin:8px 0 0;padding-left:18px}
 .dcre li{break-inside:avoid;margin:2px 0}
+/* Sign in and saved recipes */
+.acct{display:flex;align-items:center;gap:8px;margin-left:auto;flex:none}
+.acct:empty{display:none}
+.acct .who{display:flex;align-items:center;gap:8px;font-weight:600;max-width:180px}
+.acct .who span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.acct img{border-radius:50%;flex:none}
+button.discord{display:inline-flex;align-items:center;gap:8px;padding:7px 14px;border-radius:10px;border:0;background:#5865F2;color:#fff;font:600 .9rem var(--body);cursor:pointer}
+button.discord:hover{background:#4752C4}
+button.discord svg{width:18px;height:18px}
+.savebtn{white-space:nowrap}
+.savebtn[aria-pressed=true]{color:#071018;background:var(--accent);border-color:var(--accent)}
+h1 .savebtn{vertical-align:middle;font:600 .85rem var(--body);margin-left:8px}
+.savenote{margin-bottom:18px}
+.savelist{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(380px,100%),1fr));gap:14px}
+.saved{display:flex;flex-direction:column;gap:10px;margin:0}
+.saved b{display:block}
+.saved .act{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.saved .act input{width:70px;margin-left:6px}
+@media (max-width:620px){button.discord{padding:6px 10px;font-size:.8rem}.acct .who span{display:none}}

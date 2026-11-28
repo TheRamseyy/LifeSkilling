@@ -1,8 +1,8 @@
-// Saved in this browser only (localStorage): craft list, bought items, prices, "any X" picks, gathering levels, levelling plans, attributes, last page.
+// Saved in this browser (localStorage): saved recipes (also kept online when signed in, js/core/auth.js), craft list, bought items, prices, "any X" picks, gathering levels, levelling plans, attributes, last page.
 (function(){
 "use strict";
 var KEY="nwcalc.v2",LAST="nwapp.lastRoute";
-var state=App.state={list:[],buy:{},prices:{},pick:{},levels:{},lvl:{},attrs:{},cmp:[],craft:{}};
+var state=App.state={list:[],buy:{},prices:{},pick:{},levels:{},lvl:{},attrs:{},cmp:[],craft:{},saved:[]};
 // keep every saved part (craft list, prices, picks, levels, levelling plans, attributes), with defaults for anything missing
 try{var d=JSON.parse(localStorage.getItem(KEY)||"null");if(d&&typeof d==="object")Object.keys(state).forEach(function(k){if(d[k]&&typeof d[k]===typeof state[k])state[k]=d[k]})}catch(e){}
 App.save=function(){try{localStorage.setItem(KEY,JSON.stringify(state))}catch(e){}};

@@ -51,7 +51,7 @@ App.page("craft/calculator",{title:"Crafting calculator",needsData:true,render:f
 
   function renderList(){
     $("list").innerHTML=S.list.map(function(e,i){
-      return '<div class="item"><span class="n">'+App.itemLink(e.id)+'</span><input class="q" type="number" min="1" value="'+e.qty+'" data-q="'+i+'" aria-label="Quantity of '+esc(nm(e.id))+'"><button class="sm" data-rm="'+i+'" aria-label="Remove '+esc(nm(e.id))+'">✕</button></div>';
+      return '<div class="item"><span class="n">'+App.itemLink(e.id)+'</span><input class="q" type="number" min="1" value="'+e.qty+'" data-q="'+i+'" aria-label="Quantity of '+esc(nm(e.id))+'">'+App.saveButton(e.id)+'<button class="sm" data-rm="'+i+'" aria-label="Remove '+esc(nm(e.id))+'">✕</button></div>';
     }).join("")||'<div class="empty">Nothing yet. Search an item above.</div>';
   }
   function renderRaw(c){
