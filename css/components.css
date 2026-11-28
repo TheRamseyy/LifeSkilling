@@ -430,3 +430,25 @@ table.pgrid td.has{color:var(--c-gather)}table.pgrid td.may{color:var(--cat)}
 .bagcols{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:18px;align-items:start;margin-bottom:14px}
 .bagcols .slot{border:1px solid var(--line2);border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:4px}
 @media (max-width:820px){.bagcols{grid-template-columns:minmax(0,1fr)}}
+/* Where gear drops */
+.seg button{display:inline-flex;align-items:center;gap:7px;padding:7px 16px;border-radius:10px;border:0;background:none;color:var(--mute);font:600 .95rem var(--display);font-stretch:90%;cursor:pointer}
+.seg button:hover{color:var(--mist);background:var(--slate2)}
+.seg button[style]::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--c);box-shadow:0 0 8px var(--c)}
+.seg button[aria-current]{color:#071018;background:var(--c)}
+.dfilters{display:flex;flex-wrap:wrap;gap:12px 20px;align-items:center;margin-bottom:6px}
+.dfilters .seg{margin:0}
+.dq{display:flex;gap:8px;align-items:center;font-weight:600}
+.dq input{width:min(260px,60vw)}
+.dlist{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(440px,100%),1fr));gap:16px;align-items:start}
+.dcard{border-top:3px solid var(--a);margin:0}
+.dcard header{display:flex;flex-wrap:wrap;gap:4px 12px;align-items:baseline;margin-bottom:8px}
+.dcard header b{font-size:1.05rem}
+.dcard.lit{box-shadow:0 0 0 2px var(--a),0 0 24px color-mix(in srgb,var(--a) 40%,transparent)}
+.droute{padding:10px 0;border-top:1px solid var(--line)}
+.droute h4{margin:0 0 4px;font-size:.8rem;letter-spacing:.06em;text-transform:uppercase;color:var(--mute)}
+.droute p{margin:4px 0}
+.dz .k{margin-right:8px;font-weight:600}
+.dz .b{margin:2px 4px 2px 0}
+.dz small{opacity:.7}
+.dcre{columns:2 220px;margin:8px 0 0;padding-left:18px}
+.dcre li{break-inside:avoid;margin:2px 0}

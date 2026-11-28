@@ -148,7 +148,7 @@ function table(list,isTool,noSpeed){
       '<span class="gt-p" role="cell">'+perkCell(t)+'</span><span role="cell">'+howToGet(t)+'</span></summary>'+
       '<div class="gd">'+(t.pk.length?'<ul class="perks">'+t.pk.map(function(p){return '<li><b>'+esc(p[1])+':</b> '+esc(p[2])+'</li>'}).join("")+'</ul>':'')+
       (t.rs?'<p class="muted">'+t.rs+' random perk slot'+(t.rs>1?'s':'')+(t.pool&&t.pool.length?'. Can roll: '+t.pool.map(esc).join(", "):'')+'.</p>':'')+
-      '<p class="muted">'+esc(SOURCE[t.src]||"")+(App.data.byOut[t.id]?' '+App.itemLink(t.id,"Open the recipe"):'')+'</p></div></details>';
+      '<p class="muted">'+esc(SOURCE[t.src]||"")+(App.data.byOut[t.id]?' '+App.itemLink(t.id,"Open the recipe"):'')+(/drop/i.test(t.src)?' <a href="#/gather/drops/'+encodeURIComponent(t.id)+'">Where it drops</a>':'')+'</p></div></details>';
   }).join("")+'</div>';
 }
 function slotCard(area,label,x,val,extra){

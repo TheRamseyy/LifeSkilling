@@ -43,3 +43,14 @@ The first makes `recipes.json`, `names.json` and `cats.json`. The second makes
 2. Open the site locally (see [deploying.md](deploying.md)) and try a few items.
 3. Add a line to the changelog in `js/pages/changelog.js`.
 4. Publish (see [deploying.md](deploying.md)).
+
+## Where gathering gear drops
+
+This needs the creature spawn data from the NW Buddy tool first (it reads your game install):
+
+```
+C:\nw\nw-buddy\tools\bin\nwbt.exe pull slices
+python tools/build_drops.py C:\nw\nw-buddy\dist\nw-data\live\datatables C:\nw\nw-buddy\dist\nw-data\live\localization\en-us.json C:\nw\nw-buddy\.nwbt\pull\generated data/drops.json
+```
+
+Run it after `build_gear.py`, since it reads the gear list from `gear.json`.
