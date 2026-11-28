@@ -5,7 +5,7 @@ Do this after a game patch, once you have extracted the new files to
 
 ## Rebuild the data
 
-In PowerShell, in this folder, run these five lines:
+In PowerShell, in this folder, run these six lines:
 
 ```
 python tools/build_data.py C:\nw\nw-buddy\dist\nw-data\live\datatables C:\nw\nw-buddy\dist\nw-data\live\localization\en-us.json data
@@ -27,8 +27,14 @@ python tools/build_weapons.py C:\nw\nw-buddy\dist\nw-data\live\datatables C:\nw\
 python tools/build_boosts.py C:\nw\nw-buddy\dist\nw-data\live\datatables C:\nw\nw-buddy\dist\nw-data\live\localization\en-us.json data/boosts.json
 ```
 
+```
+python tools/build_sources.py C:\nw\nw-buddy\dist\nw-data\live\datatables C:\nw\nw-buddy\dist\nw-data\live\localization\en-us.json data/sources.json
+```
+
+Run `build_data.py` before `build_sources.py`: the sources script only keeps items listed in `names.json`.
+
 The first makes `recipes.json`, `names.json` and `cats.json`. The second makes
-`gather.json`. The third makes `gear.json` (gathering tools and clothing). The fourth makes `weapons.json`. The fifth makes `boosts.json`. Each prints how many things it found.
+`gather.json`. The third makes `gear.json` (gathering tools and clothing). The fourth makes `weapons.json`. The fifth makes `boosts.json`. The sixth makes `sources.json` (where to get items). Each prints how many things it found.
 
 ## After updating
 
