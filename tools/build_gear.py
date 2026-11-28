@@ -1,5 +1,5 @@
-# Builds data/gear.json: gathering tools and clothing for each gathering skill, plus crafting
-# clothing and the XP needed per level for each crafting skill.
+# Builds data/gear.json: gathering tools and clothing for each gathering skill, bags (satchels) and the
+# perks they can roll, plus crafting clothing and the XP needed per level for each crafting skill.
 # Usage (from the repo folder):
 #   python tools/build_gear.py C:\nw\nw-buddy\dist\nw-data\live\datatables C:\nw\nw-buddy\dist\nw-data\live\localization\en-us.json data/gear.json
 import glob, json, os, re, sys
@@ -40,6 +40,7 @@ for f in sorted(glob.glob(os.path.join(D, "javelindata_itemdefinitions_master_*.
         if isinstance(r, dict) and r.get("ItemID") and r["ItemID"] not in items:
             items[r["ItemID"]] = (src, r)
 stats = {r["WeaponID"]: r for r in table("javelindata_itemdefinitions_weapons.json")}
+armor_stats = {r["WeaponID"]: r for r in table("javelindata_itemdefinitions_armor.json")}
 perks = {}
 for t in ("javelindata_perks.json", "javelindata_perks_2025.json"):
     for p in table(t):
@@ -84,6 +85,28 @@ def random_slots(r):
     return len(bs), [loc(perks[p].get("DisplayName")) or p for p in pool]
 
 
+def bag_pool(r):
+    """Perks a bag can roll: follows nested buckets ([PBID]...) and keeps perks allowed on bags."""
+    pool, seen = [], set()
+
+    def walk(b):
+        if b in seen:
+            return
+        seen.add(b)
+        for k in range(1, 400):
+            p = (buckets.get(b) or {}).get(f"Perk{k}")
+            if not p:
+                continue
+            if p.startswith("[PBID]"):
+                walk(p[6:])
+            elif p in perks and "Bag" in (perks[p].get("ItemClass") or []) and p not in pool:
+                pool.append(p)
+    for n in range(1, 6):
+        if r.get(f"PerkBucket{n}"):
+            walk(r[f"PerkBucket{n}"])
+    return pool
+
+
 tool_perks = {}  # perk id -> skills of the tools it can roll on
 
 
@@ -108,7 +131,7 @@ def craft_skill_of(pid):
     return CRAFT_PERK.get(m.group(1)) if m else None
 
 
-out = {"skills": {}, "levels": {}, "crafting": {}}
+out = {"skills": {}, "levels": {}, "crafting": {}, "bags": []}
 for s in CRAFT_SKILLS:
     t = "javelindata_tradeskill%s.json" % s.lower()
     rows = table(t) if os.path.exists(os.path.join(D, t)) else []
@@ -129,6 +152,19 @@ for iid, (src, r) in items.items():
     source = "Crafted" if iid.lower() in crafted else SOURCE[src]
     base = {"id": iid, "n": name, "tr": r.get("Tier") or 0, "gs": gs, "lv": r.get("RequiredLevel") or 0, "src": source,
             "bop": 1 if r.get("BindOnPickup") else 0}
+    if "Bag" in cls:
+        st = armor_stats.get(r.get("ItemStatsRef") or "") or {}
+        if not st.get("Encumbrance"):
+            continue
+        slots, pool = random_slots(r)
+        lo = r.get("MinGearScore") or gs
+        # carry weight it adds, in the game's weight units (stats are stored x10). Assumed: base at the lowest
+        # gear score, plus EncumbrancePerGS for every point above it.
+        base.update(gmin=lo, wt=round((st["Encumbrance"] + (st.get("EncumbrancePerGS") or 0) * max(0, gs - lo)) / 10),
+                    pk=[[p] + perk_text(p, gs) for p in item_perks(r) if p in perks],
+                    rs=slots, pool=sorted({loc(perks[p].get("DisplayName")) or p for p in bag_pool(r)}))
+        out["bags"].append(base)
+        continue
     if "EquippableTool" in cls:
         skill = next((s for s, c in SKILLS.items() if c in cls), None)
         st = stats.get(r.get("ItemStatsRef") or "")
@@ -167,6 +203,10 @@ for s in out["crafting"].values():
 for s in out["skills"].values():
     s["tools"].sort(key=lambda x: (-x["sp"], -x["gs"], x["n"]))
     s["wear"].sort(key=lambda x: (x["slot"], -(x["pk"][0][3] or 0), -x["gs"], x["n"]))
+out["bags"].sort(key=lambda x: (-x["tr"], -x["wt"], x["n"]))
+# Every perk a bag can have, worked out at gear score 600 and 700: [id, name, text at 600, value at 600, value at 700]
+out["bagPerks"] = sorted(([p] + perk_text(p, 600) + [perk_text(p, 700)[2]] for p, v in perks.items()
+                          if "Bag" in (v.get("ItemClass") or []) and perk_text(p, 600)), key=lambda x: x[1])
 # Every perk a tool can have (listed or random), worked out at gear score 700, with the skills it appears on
 out["toolPerks"] = sorted(([p] + perk_text(p, 700) + [sorted(sk)] for p, sk in tool_perks.items() if perk_text(p, 700)), key=lambda x: x[1])
 json.dump(out, open(OUT, "w", encoding="utf-8"), separators=(",", ":"), ensure_ascii=False)

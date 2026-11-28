@@ -38,3 +38,12 @@ test("tools are sorted fastest first", () => {
   const sp = G.skills.Logging.tools.map((t) => t.sp);
   assert.deepStrictEqual(sp, [...sp].sort((a, b) => b - a));
 });
+
+test("bags: carry weight matches nwdb and crafted bags can roll gathering perks", () => {
+  const bag = (id) => G.bags.find((b) => b.id === id);
+  assert.strictEqual(bag("BagAT5").wt, 360); // nwdb: +360 at gear score 600
+  assert.strictEqual(bag("Artisan_BagAT52").wt, 300); // nwdb: +300 at gear score 700
+  assert.ok(bag("BagBT5").pool.includes("Prospector's Burden"));
+  const p = G.bagPerks.find((x) => x[0] === "PerkID_Bags_MiningOre");
+  assert.strictEqual(p[4], 20); // 20% lighter ore at gear score 700
+});

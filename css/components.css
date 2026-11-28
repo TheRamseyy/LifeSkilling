@@ -427,3 +427,6 @@ table.pgrid td.has{color:var(--c-gather)}table.pgrid td.may{color:var(--cat)}
 .item .n .b{white-space:normal}
 .gt-note{grid-column:1/-1}
 @container (min-width:761px){.gt-note{grid-column:auto}}
+.bagcols{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:18px;align-items:start;margin-bottom:14px}
+.bagcols .slot{border:1px solid var(--line2);border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:4px}
+@media (max-width:820px){.bagcols{grid-template-columns:minmax(0,1fr)}}

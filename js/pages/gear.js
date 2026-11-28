@@ -21,6 +21,13 @@ var SOURCE={
   "Not craftable":"A special version that cannot be crafted. The game files do not say where it comes from."
 };
 
+// Bag perks that help each gathering skill (perk ids from gear.json bagPerks), then ones that help any skill.
+// "unsure" lists perks whose item list (food, alchemy reagents) is only assumed to cover what this skill gathers.
+var BAGPERK={Mining:["PerkID_Bags_MiningOre","PerkID_Bags_StoneWeight"],Logging:["PerkID_Bags_LoggingWeight"],
+  Harvesting:["PerkID_Bags_HarestingWeight","PerkID_Bags_AlchemistWeight","PerkID_Bags_CookingWeight"],
+  Skinning:["PerkID_Bags_SkinningWeight","PerkID_Bags_CookingWeight"],Fishing:["PerkID_Bags_CookingWeight"]};
+var BAGUNSURE={Harvesting:["PerkID_Bags_AlchemistWeight","PerkID_Bags_CookingWeight"],Skinning:["PerkID_Bags_CookingWeight"],Fishing:["PerkID_Bags_CookingWeight"]};
+var BAGANY=["PerkID_Bags_WeightAdd","PerkID_Bags_AzothYield","PerkID_Bags_BonusTown"];
 function recipe(x){var l=App.data.byOut[x.id];return l&&l[0]}
 function link(x){return (App.data.byOut[x.id]||App.data.N[x.id])?App.itemLink(x.id,x.n):esc(x.n)}
 function perkSum(x){return (x.pk||[]).reduce(function(s,p){return s+(p[3]||0)},0)}
@@ -43,7 +50,7 @@ function howToGet(x){
   return h;
 }
 function perkCell(x){
-  var h=(x.pk||[]).map(shortPerk).join("<br>");
+  var h=(x.wt?'<b>+'+x.wt+'</b> carry weight'+((x.pk||[]).length?'<br>':''):'')+(x.pk||[]).map(shortPerk).join("<br>");
   if(x.rs)h+=(h?"<br>":"")+'<span class="muted">'+x.rs+' random perk'+(x.rs>1?'s':'')+'</span>';
   return h||'<span class="muted">None</span>';
 }
@@ -79,6 +86,8 @@ function draw(root,skill,G){
   // What to use as you level
   var nodes=Object.keys(App.data.G.n).map(function(k){return App.data.G.n[k]}).filter(function(v){return v[1]===skill});
   var bt=bestTool(tools);
+  var bp={};(G.bagPerks||[]).forEach(function(p){bp[p[0]]=p});
+  var myBagPerks=(BAGPERK[skill]||[]).map(function(id){return bp[id]}).filter(Boolean);
   h+='<section class="card" aria-labelledby="h-bands"><h2 id="h-bands">What to use as you level</h2><p class="muted" style="margin:-6px 0 14px">The easiest gear of the right tier for each stage: lowest gear score first, then crafted or dropped before rarer sources. You do not need top gear score to gather well.</p><ol class="bands">';
   BANDS.forEach(function(B){
     var tl=easyPick(tools,B.tr,function(x){return x.src==="Crafted"&&!x.pk.length})||easyPick(tools,B.tr);
@@ -90,6 +99,9 @@ function draw(root,skill,G){
     h+='<p><span class="k">Tool</span>'+(tl?link(tl)+' <span class="muted">('+(fish?'':'speed '+tl.sp+', ')+'gear score '+tl.gs+(tl.lv?', equip level '+tl.lv:'')+')</span> '+howToGet(tl):'<span class="muted">None in the files</span>')+'</p>';
     if(B.top&&bt&&bt!==tl)h+='<p><span class="k">Upgrade later</span>'+link(bt)+' <span class="muted">(gear score '+bt.gs+')</span> '+howToGet(bt)+'</p>';
     h+='<p><span class="k">Clothing</span>'+(wl.length?wl.map(function(w){return link(w)+' <span class="muted">'+esc(w.slot.toLowerCase())+', GS '+w.gs+'</span>'}).join(", ")+'<br><span class="muted">'+esc(SOURCE[wl[0].src]||"")+'</span>':'<span class="muted">No tier '+B.tr+' '+esc(low)+' clothing in the files.'+(B.tr===2?' It starts at tier 3, from level 50.':'')+'</span>')+'</p>';
+    var bA=bagPick(G.bags,B.tr,"BagA"),bB=bagPick(G.bags,B.tr,"BagB");
+    if(bA||bB)h+='<p><span class="k">Bag</span>'+[bA,bB].filter(Boolean).map(function(b){return link(b)+' <span class="muted">(+'+b.wt+' carry weight at GS '+b.gs+')</span>'}).join(" or ")+
+      (bA&&bA.rs?'<br><span class="muted">Craft or buy one with '+myBagPerks.map(function(p){return esc(p[1])}).join(" or ")+' in its '+(bA.rs>1?bA.rs+' random perk slots':'random perk slot')+'. A duffel holds more but slows you down.</span>':'')+'</p>';
     if(spd)h+='<p><span class="k">Skill bonus</span>Your '+esc(low)+' level itself adds '+spd+' to gathering speed'+App.unsure("The game value from the skill table. How it combines with the tool speed is not confirmed.")+'.</p>';
     h+='</div></li>';
   });
@@ -98,6 +110,15 @@ function draw(root,skill,G){
   // Boosts
   h+='<section class="card" aria-labelledby="h-bst"><h2 id="h-bst">Boosts for '+esc(low)+'</h2><p class="muted" style="margin:-6px 0 12px">Food, housing trophies, territory buffs, music and attribute bonuses that help, from the game files. Luck is shown as a percentage: the game counts 100 luck points as 1%.</p>'+App.boostTable(G.boosts,skill)+
     '</section>';
+
+  // Bags
+  var bestBag=(G.bags||[]).filter(function(b){return b.src==="Crafted"&&b.rs>=5}).sort(function(a,b){return b.wt-a.wt||b.gs-a.gs})[0];
+  function bagPerkRow(p,unsure){var pc=/%/.test(p[2])?'%':'';return '<li><b>'+esc(p[1])+':</b> '+esc(p[2])+' <span class="muted">(at GS 600; '+p[4]+pc+' at GS 700)</span>'+(unsure?App.unsure("The perk lists food or alchemy items in general; that it covers what "+low+" gives you is assumed."):'')+'</li>'}
+  h+='<section class="card" aria-labelledby="h-bag"><h2 id="h-bag">Bags (satchels)</h2><p class="muted" style="margin:-6px 0 12px">Bags add carry weight, so you can gather for longer before you have to empty your bags at storage. Their random perks can also cut the weight of what you gather. Satchels are light to wear; Porter’s Duffels hold more but slow you down. Carry weight and perk values from the game files; the carry weight matches nwdb.</p>';
+  h+='<div class="bagcols"><div><h3 class="slot-h">Perks that help '+esc(low)+'</h3><ul class="perks">'+myBagPerks.map(function(p){return bagPerkRow(p,(BAGUNSURE[skill]||[]).indexOf(p[0])>=0)}).join("")+'</ul>'+
+    '<h3 class="slot-h">Perks that help any gathering</h3><ul class="perks">'+BAGANY.map(function(id){return bp[id]}).filter(Boolean).map(function(p){return bagPerkRow(p)}).join("")+'</ul></div>';
+  if(bestBag)h+='<div class="slot s-bag"><span class="sl">Best bag for '+esc(low)+'</span><b class="sn">'+link(bestBag)+'</b><span class="sv">+'+bestBag.wt+' carry weight</span><span class="muted">GS '+bestBag.gmin+' to '+bestBag.gs+', crafted, '+bestBag.rs+' random perks</span><p class="muted" style="margin:8px 0 0">Look for '+myBagPerks.slice(0,2).map(function(p){return esc(p[1])}).join(" and ")+' plus Extra Pockets in its random perks. The Infused Leather Porter’s Duffel holds the same at GS 600 but slows you down.</p></div>';
+  h+='</div>'+table(G.bags||[],false,true)+'</section>';
 
   // Endgame best in slot
   h+='<section class="card" aria-labelledby="h-bis"><h2 id="h-bis">Endgame best in slot</h2><p class="muted" style="margin:-6px 0 14px">The strongest pieces in the game files, mostly at top gear score. A long-term goal, not what you need to start.</p><div class="doll">';
@@ -115,6 +136,8 @@ function draw(root,skill,G){
   root.innerHTML=h;
 }
 
+// The plain crafted bag of a tier: kind "BagA" (Adventurer's Satchel) or "BagB" (Porter's Duffel)
+function bagPick(bags,tier,kind){return (bags||[]).filter(function(b){return b.tr===tier&&b.src==="Crafted"&&b.id.indexOf(kind+"T")===0&&!b.pk.length}).sort(function(a,b){return (b.rs>0)-(a.rs>0)||a.gs-b.gs})[0]}// prefer bags with a perk slot
 function table(list,isTool,noSpeed){
   var max=Math.max.apply(null,list.map(function(t){return t.sp||0}))||1;
   return '<div class="gt'+(noSpeed?' nospd':'')+'" role="table"><div class="gt-h" role="row"><span role="columnheader">'+(isTool?'Tool':'Item')+'</span>'+(noSpeed?'':'<span role="columnheader">Speed</span>')+'<span role="columnheader">Tier</span><span role="columnheader">Gear score</span><span role="columnheader">Equip level</span><span role="columnheader">Perks</span><span role="columnheader">How to get it</span></div>'+
