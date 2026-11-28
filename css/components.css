@@ -94,25 +94,6 @@ fieldset.pick legend{padding:0 6px;font-weight:600}
 .chips input:focus-visible+span{box-shadow:var(--focus)}
 .pick select{width:100%;margin-top:6px}
 
-/* Recipe flow: columns left to right, cards joined by curved lines */
-.flow{position:relative;overflow:auto;border-radius:var(--r-l);background:rgba(15,20,38,.5);border:1px solid rgba(61,74,112,.45);padding:16px;max-height:78vh}
-.fl-in{position:relative}
-.fl-svg{position:absolute;inset:0;overflow:visible}
-.fe{fill:none;stroke-width:1.6;opacity:.38;transition:opacity .2s,stroke-width .2s}
-.fe.k-raw{stroke:var(--moss)}.fe.k-craft{stroke:var(--azoth)}.fe.k-buy,.fe.k-cat{stroke:var(--lilac)}.fe.k-cur{stroke:var(--mute)}
-.fl-col{position:absolute;top:0;font:600 .82rem var(--display);font-stretch:90%;color:var(--mute);text-align:center}
-.fn{position:absolute;display:grid;grid-template-columns:auto 1fr;column-gap:8px;align-items:baseline;height:48px;padding:5px 10px;border-radius:10px;background:var(--slate);border:1px solid var(--line2);border-left:3px solid var(--mute);color:var(--mist);text-decoration:none;overflow:hidden;transition:opacity .2s,border-color .2s,box-shadow .2s}
-.fn b{font:600 .92rem var(--display);font-variant-numeric:tabular-nums}
-.fn .fl-n{font-size:.86rem;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.fn small{grid-column:1/3;font-size:.72rem;color:var(--mute);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.fn.k-raw{border-left-color:var(--moss)}.fn.k-raw b{color:var(--moss)}
-.fn.k-craft{border-left-color:var(--azoth)}.fn.k-craft b{color:var(--azoth)}
-.fn.k-buy{border-left-color:var(--lilac)}.fn.k-buy b{color:var(--lilac)}
-.fn.k-cat{border-left-color:var(--ember)}.fn.k-cat b{color:var(--ember)}
-.fn:hover,.fn:focus-visible{border-color:var(--azoth);box-shadow:0 0 0 1px var(--azoth),0 6px 20px rgba(5,8,18,.5);z-index:2}
-.flow.hl .fn{opacity:.28}.flow.hl .fn.on{opacity:1}
-.flow.hl .fe{opacity:.07}.flow.hl .fe.on{opacity:.95;stroke-width:2.4}
-
 /* Breakdown tree */
 .legend{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
 .tree,.tree ul{list-style:none;margin:0;padding:0}
@@ -319,9 +300,6 @@ select.anypick{padding:3px 8px;font-size:.86rem;border-radius:8px;border-color:c
 .src{margin-top:4px}
 /* Item page: two columns on wide screens */
 @media (min-width:1180px){.item-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:0 40px;align-items:start}}
-/* Recipe flow lanes: one band per crafting skill */
-.fl-lane{position:absolute;left:-10px;right:-10px;border-radius:12px;background:linear-gradient(90deg,color-mix(in srgb,var(--c) 9%,transparent),color-mix(in srgb,var(--c) 3%,transparent));border:1px solid color-mix(in srgb,var(--c) 18%,transparent)}
-.fl-lane span{position:absolute;left:12px;top:4px;font:600 .78rem var(--display);font-stretch:90%;color:var(--c);letter-spacing:.02em}
 /* Wide screens: use the space */
 @media (min-width:1500px){
   .runs>div:last-child{display:grid;grid-template-columns:repeat(auto-fit,minmax(520px,1fr));gap:0 34px;align-items:start}
@@ -401,3 +379,33 @@ table.pgrid td.has{color:var(--c-gather)}table.pgrid td.may{color:var(--cat)}
 @media (max-width:900px){.slots,.cbar{grid-template-columns:repeat(3,minmax(0,1fr))}.slots>:first-child{grid-column:auto}.cbl{grid-column:1/-1}}
 .slotc,.slotc select,.cbv{min-width:0}
 @media (max-width:600px){.slotc{padding:8px}.slotc .sn{font-size:.9rem}.cbv{padding:0 6px}.cbv b{font-size:.9rem}.presets .pgroup{flex-wrap:wrap}}
+
+/* Crafting plan: steps top to bottom, no lines */
+.steps-plan{list-style:none;margin:0;padding:0;counter-reset:none}
+.pstage{position:relative;padding:14px 0 18px 46px}
+.pstage::before{content:"";position:absolute;left:15px;top:44px;bottom:-4px;width:2px;background:linear-gradient(var(--accent),transparent);opacity:.35}
+.pstage:last-child::before{display:none}
+.pstage>header{display:flex;align-items:baseline;gap:10px;margin:0 0 12px}
+.pstage>header b{font:600 1.12rem var(--display);font-stretch:90%}
+.pnum{position:absolute;left:0;top:10px;width:32px;height:32px;border-radius:50%;display:grid;place-items:center;font:600 .95rem var(--display);color:var(--night);background:var(--accent);box-shadow:0 0 14px color-mix(in srgb,var(--accent) 50%,transparent)}
+.pgroups{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:10px}
+.pgroup2{padding:10px 12px;border-radius:12px;background:color-mix(in srgb,var(--a) 7%,rgba(15,20,38,.55));border:1px solid color-mix(in srgb,var(--a) 28%,var(--line))}
+.pgroup2 h4{margin:0 0 8px;font:600 .9rem var(--display);font-stretch:90%;color:var(--a)}
+.pchips{display:flex;flex-wrap:wrap;gap:6px}
+.pchip{display:inline-flex;align-items:baseline;flex-wrap:wrap;gap:5px;padding:3px 10px;border-radius:999px;font-size:.84rem;color:var(--mist);text-decoration:none;background:color-mix(in srgb,var(--a) 12%,transparent);border:1px solid color-mix(in srgb,var(--a) 35%,transparent);transition:box-shadow .15s,border-color .15s}
+.pchip b{font:600 .88rem var(--display);color:var(--a)}
+.pchip small{font-size:.7rem;color:var(--mute)}
+.pchip small.via{color:var(--cat)}
+.pchip.big{padding:4px 12px}
+.pchip:hover,.pchip:focus-visible{border-color:var(--a)}
+.pcards{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:10px}
+.pcard{padding:12px 14px;border-radius:12px;background:rgba(28,36,64,.7);border:1px solid var(--line);border-left:4px solid var(--a);transition:box-shadow .15s,border-color .15s}
+.pc-top{display:flex;align-items:baseline;gap:8px}
+.pc-top a{flex:1;font:600 1.02rem var(--display);font-stretch:90%;color:var(--mist);text-decoration:none}
+.pc-top a:hover{color:var(--a)}
+.pq{font:600 1.05rem var(--display);color:var(--a)}
+.pc-meta{font-size:.8rem;color:var(--mute);margin:2px 0 8px}
+.pc-needs{display:flex;flex-wrap:wrap;gap:5px;align-items:center}
+.pc-needs>.muted{font-size:.74rem;margin-right:2px}
+.lit{box-shadow:0 0 0 2px var(--a),0 0 18px color-mix(in srgb,var(--a) 55%,transparent)!important;border-color:var(--a)!important}
+@media (max-width:600px){.pstage{padding-left:40px}.pgroups,.pcards{grid-template-columns:1fr}}

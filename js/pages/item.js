@@ -31,7 +31,7 @@ App.page("item",{title:"Item",needsData:true,render:function(root,id){
     (gl.length?'<h3 class="slot-h">Gathering nodes that can drop it</h3><div class="nodes">'+gl.map(function(x){return '<div>'+App.nodeLine(x.v)+'</div>'}).join("")+'</div>':'')+
     '<div id="isrc"><p class="loading">Looking up other sources…</p></div></section>';
   h+='</div></div>';
-  if(r)h+='<section class="card" aria-labelledby="h-iflow"><h2 id="h-iflow">Recipe flow</h2><div id="iflow"></div></section>';
+  if(r)h+='<section class="card" aria-labelledby="h-iflow"><h2 id="h-iflow">Crafting plan</h2><div id="iflow"></div></section>';
   root.innerHTML=h;
   if(r)App.Flow(root.querySelector("#iflow")).set(NWCalc.expand([{id:id,qty:r.o[1]}],{byOut:D.byOut,cats:D.C,buy:App.state.buy,pick:App.state.pick}));
   App.loadJSON("sources.json").then(function(S){
