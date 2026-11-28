@@ -1,58 +1,92 @@
-// Gear > Attributes: what each attribute does, its milestone bonuses, and how points lose value as you add more.
+// Gear > Attributes: set your five attributes with sliders, like the in-game screen, and see every bonus you
+// unlock, gathering and crafting first. Milestones and per-point values come from the game files.
 (function(){
 "use strict";
 var esc=App.esc,fmt=App.fmt,S=App.state;
 var KEYS=["Str","Dex","Int","Foc","Con"];
+var MILES=[25,50,100,150,200,250,300,350];
 // words that mark a gathering or crafting effect in a milestone bonus
-var TRADE=/mining|logging|harvest|skinning|fishing|gather|craft|refin|smelt|weav|leather|wood|stone|cook|luck|yield|encumbrance|carry|weight/i;
-function bonusLines(t){return t.split("\n").map(function(l){return l.replace(/^\s*\u2022\s*/,"").trim()}).filter(Boolean)}
-var DERIVED={Health:"Health",Mana:"Mana",Stamina:"Stamina",HealthRate:"Health regeneration",ManaRate:"Mana regeneration",StaminaRate:"Stamina regeneration",EquipLoad:"Equip load",Encumbrance:"Carry weight",CastSpeed:"Cast speed"};
+var TRADE=/mining|logging|harvest|skinning|fishing|fish|gather|craft|refin|azoth|encumbrance|carry|weight|ore|tree|prey/i;
+var DERIVED={Health:"Health",Mana:"Mana",Stamina:"Stamina",EquipLoad:"Equip load",Encumbrance:"Carry weight"};
+
+function bonusLines(t){return t.split("\n").map(function(l){return l.replace(/^\s*•\s*/,"").trim()}).filter(Boolean)}
+// "+10% mining speed" -> {n:10, unit:"%", key:"mining speed"} so equal effects from several milestones add up
+function parse(l){
+  var m=/^([+-]?)(\d+(?:\.\d+)?)(%?)\s+(.*)$/.exec(l);
+  if(!m)return null;
+  return {n:(m[1]==="-"?-1:1)*parseFloat(m[2]),unit:m[3],sign:m[1]||"",key:m[4].replace(/\.$/,"").toLowerCase()};
+}
+function mark(l){return TRADE.test(l)?'<mark class="ts">'+esc(l)+'</mark>':esc(l)}
 
 App.page("gear/attributes",{title:"Attributes",render:function(root){
   root.innerHTML='<h1>Attributes</h1><p class="loading">Loading…</p>';
   App.loadJSON("weapons.json").then(function(W){
-    function draw(){
-      var h='<h1>Attributes</h1><p class="sub">What Strength, Dexterity, Intelligence, Focus and Constitution do for gathering and crafting, the bonuses you unlock along the way, and how each extra point counts for a little less. Gathering tools do not scale with attributes; attributes help through these milestone bonuses.</p>'+App.gearNav("gear/attributes");
-      h+='<section class="card glass" aria-labelledby="h-mine"><h2 id="h-mine">Your attributes</h2><p class="muted" style="margin:-4px 0 10px">Optional. Saved in this browser and used to show which bonuses you have reached.</p><div class="mine">'+
-        KEYS.map(function(k){return '<label style="--a:'+App.ATTR[k][1]+'">'+App.ATTR[k][0]+'<input type="number" min="5" max="500" inputmode="numeric" data-at="'+k+'" value="'+(S.attrs[k]!=null?esc(S.attrs[k]):"")+'" placeholder="5"></label>'}).join("")+'</div></section>';
+    KEYS.forEach(function(k){if(S.attrs[k]==null)S.attrs[k]=5});
+    var A={};KEYS.forEach(function(k){A[k]=W.attrs[App.ATTR[k][0]]});
+    function max(k){return A[k].lv0+A[k].per.length-1}
 
-      // Diminishing returns chart
-      var A=W.attrs.Strength,lv0=A.lv0,n=A.per.length,w=760,ht=220,pad=36;
-      var maxV=Math.max.apply(null,KEYS.map(function(k){return Math.max.apply(null,W.attrs[App.ATTR[k][0]].per)}));
-      function x(i){return pad+i/(n-1)*(w-pad*1.5)}function y(v){return ht-pad+4-(v/maxV)*(ht-pad*1.6)}
-      // attributes with identical curves share one line, named in the legend
-      var groups=[];KEYS.forEach(function(k){var s=JSON.stringify(W.attrs[App.ATTR[k][0]].per),g=groups.filter(function(g){return g.s===s})[0];if(g)g.k.push(k);else groups.push({s:s,k:[k]})});
-      var same=groups.length===1;
-      var lines=groups.map(function(g){var p=W.attrs[App.ATTR[g.k[0]][0]].per;return '<polyline fill="none" stroke="'+App.ATTR[g.k[0]][1]+'" stroke-width="2.5" points="'+p.map(function(v,i){return x(i).toFixed(1)+","+y(v).toFixed(1)}).join(" ")+'"/>'}).join("");
-      var legend='<div class="legend">'+groups.map(function(g){return '<span class="at" style="--a:'+App.ATTR[g.k[0]][1]+'">'+g.k.map(function(k){return App.ATTR[k][0]}).join(", ")+'</span>'}).join("")+'</div>';
-      var ticks=[5,100,200,300,400,500].map(function(L){var i=L-lv0;return i<0||i>=n?"":'<text x="'+x(i)+'" y="'+(ht-8)+'" text-anchor="middle">'+L+'</text><line x1="'+x(i)+'" x2="'+x(i)+'" y1="'+(ht-pad+6)+'" y2="'+(ht-pad+10)+'" stroke="var(--line2)"/>'}).join("");
-      h+='<section class="card" aria-labelledby="h-dim"><h2 id="h-dim">Each point counts for less</h2><p class="muted" style="margin:-4px 0 10px">How much one more point is worth at each attribute level'+(same?' (the same for all five attributes)':'')+'. From the attribute tables in the game files.</p>'+legend+
-        '<svg class="chart" viewBox="0 0 '+w+' '+ht+'" role="img" aria-label="Value of each attribute point falls from '+A.per[0]+' at level '+lv0+' to '+A.per[n-1]+' at level '+(lv0+n-1)+'">'+
-        '<line x1="'+pad+'" x2="'+(w-pad/2)+'" y1="'+(ht-pad+4)+'" y2="'+(ht-pad+4)+'" stroke="var(--line2)"/>'+lines+ticks+
-        '<text x="'+pad+'" y="16">'+A.per[0]+' per point</text><text x="'+(w-pad/2)+'" y="'+(y(A.per[n-1])-8)+'" text-anchor="end">'+A.per[n-1]+' per point</text></svg>'+
-        '<p class="note">At level '+lv0+' a point is worth '+A.per[0]+'; by level '+(lv0+n-1)+' it is worth '+A.per[n-1]+'. From the attribute tables in the game files.</p></section>';
+    var h='<h1>Attributes</h1><p class="sub">Set your attributes like on the in-game screen, including points from gear. Every milestone you reach lights up, and the panel adds up what they give you. Gathering tools do not scale with attributes; attributes help gathering and crafting through these milestone bonuses.</p>'+App.gearNav("gear/attributes");
+    h+='<div class="attr-layout"><section class="card glass attr-panel" aria-labelledby="h-set"><h2 id="h-set">Your attributes <span class="act"><button class="sm" type="button" id="reset">Reset to '+A.Str.lv0+'</button></span></h2>';
+    h+=KEYS.map(function(k){
+      var col=App.ATTR[k][1],a=A[k],mx=max(k);
+      var ticks=MILES.map(function(m){return '<span class="tick" data-m="'+m+'" style="left:'+((m-a.lv0)/(mx-a.lv0)*100)+'%" title="'+m+'"></span>'}).join("");
+      return '<div class="arow" style="--a:'+col+'" data-row="'+k+'">'+
+        '<div class="ahead"><b>'+App.ATTR[k][0]+'</b><span class="muted" data-info="'+k+'"></span></div>'+
+        '<div class="actl"><button type="button" class="sm step" data-step="-1" data-k="'+k+'" aria-label="One less '+App.ATTR[k][0]+'">−</button>'+
+        '<div class="slider"><div class="track"><div class="fill" data-fill="'+k+'"></div>'+ticks+'</div>'+
+        '<input type="range" min="'+a.lv0+'" max="'+mx+'" step="1" value="'+S.attrs[k]+'" data-k="'+k+'" aria-label="'+App.ATTR[k][0]+'"></div>'+
+        '<button type="button" class="sm step" data-step="1" data-k="'+k+'" aria-label="One more '+App.ATTR[k][0]+'">+</button>'+
+        '<input type="number" class="anum" min="'+a.lv0+'" max="'+mx+'" value="'+S.attrs[k]+'" data-num="'+k+'" aria-label="'+App.ATTR[k][0]+' value"></div>'+
+        '<div class="anext" data-next="'+k+'"></div></div>';
+    }).join("");
+    h+='<p class="muted" data-total></p></section>';
+    h+='<section class="card attr-sum" aria-labelledby="h-sum" aria-live="polite"><h2 id="h-sum">What you get</h2><div id="sum"></div></section></div>';
+    h+='<section class="card" aria-labelledby="h-all"><h2 id="h-all">Every milestone</h2><div class="attrs" id="all"></div><p class="note">Milestone bonuses are read from the game\'s attribute ability table. Each attribute starts at '+A.Str.lv0+'.</p></section>';
+    root.innerHTML=h;
 
-      // One card per attribute
-      h+='<div class="attrs">'+KEYS.map(function(k){
-        var name=App.ATTR[k][0],a=W.attrs[name],col=App.ATTR[k][1];
-        // the lines of its milestone bonuses that help gathering or crafting
-        var trade=[];a.bonus.forEach(function(b){bonusLines(b[1]).forEach(function(l){if(TRADE.test(l))trade.push([b[0],l])})});
-        var mine=+S.attrs[k],i=mine?Math.max(0,Math.min(a.sum.length-1,mine-a.lv0)):null;
-        var der=Object.keys(a.derived).map(function(c){var v=a.derived[c];return '<p class="muted" style="margin:4px 0">'+esc(DERIVED[c]||c)+': +'+fmt(v[1]-v[0])+' per point'+(i!=null?', <b style="color:var(--mist)">'+fmt(Math.round(v[i]))+'</b> at your '+mine:'')+'</p>'}).join("");
-        return '<article class="acard" style="--a:'+col+'"><h3>'+esc(name)+'</h3>'+
-          (trade.length?'<div class="tradebox"><b>For gathering and crafting</b><ul>'+trade.map(function(t){return '<li><span>'+t[0]+'</span> '+esc(t[1])+'</li>'}).join("")+'</ul></div>':'<p class="muted" style="margin:0">No gathering or crafting bonus.</p>')+der+
-          (i!=null?'<p style="margin:8px 0 0">At '+mine+': <b>'+fmt(Math.round(a.sum[i]))+'</b> effective points'+App.unsure("Running total from the attribute table; how the game uses it is not confirmed.")+'</p>':'')+
-          '<ol>'+a.bonus.map(function(b){return '<li'+(mine&&mine>=b[0]?' style="opacity:1"':mine?' style="opacity:.55"':'')+'><b>'+b[0]+'</b><span>'+bonusLines(b[1]).map(function(l){return TRADE.test(l)?'<mark class="ts">'+esc(l)+'</mark>':esc(l)}).join("\n")+'</span></li>'}).join("")+'</ol></article>';
-      }).join("")+'</div>';
-      h+='<p class="note">Milestone bonuses are read from the game\'s attribute ability table. Bonuses you have reached are shown brighter once you type your attributes.</p>';
-      root.innerHTML=h;
+    function sum(list){
+      // add up equal effects (e.g. +10% and +20% mining speed = +30% mining speed)
+      var groups={},order=[],rest=[];
+      list.forEach(function(u){var p=parse(u.l);if(!p){rest.push(u);return}var key=p.key+"|"+p.unit,g=groups[key];if(!g){g=groups[key]={p:p,n:0,from:[]};order.push(g)}g.n+=p.n;g.from.push(App.ATTR[u.k][0].slice(0,3)+" "+u.m)});
+      return order.map(function(g){var v=Math.round(g.n*100)/100;return '<li><b>'+(v>0&&g.p.sign!==""?"+":"")+fmt(v)+g.p.unit+'</b> '+esc(g.p.key)+' <span class="muted">('+g.from.join(", ")+')</span></li>'}).join("")+
+        rest.map(function(u){return '<li>'+esc(u.l)+' <span class="muted">('+App.ATTR[u.k][0].slice(0,3)+' '+u.m+')</span></li>'}).join("");
     }
-    draw();
-    root.addEventListener("change",function(e){
-      var k=e.target.dataset&&e.target.dataset.at;if(!k)return;
-      var v=e.target.value.trim();
-      if(v==="")delete S.attrs[k];else S.attrs[k]=Math.max(5,Math.min(500,parseInt(v,10)||5));
-      App.save();draw();var el=root.querySelector('[data-at="'+k+'"]');if(el)el.focus();
+    function update(){
+      var spent=0,unlocked=[];
+      KEYS.forEach(function(k){
+        var v=+S.attrs[k],a=A[k],mx=max(k),i=Math.max(0,Math.min(a.per.length-1,v-a.lv0));
+        spent+=v-a.lv0;
+        root.querySelector('[data-fill="'+k+'"]').style.width=((v-a.lv0)/(mx-a.lv0)*100)+"%";
+        root.querySelectorAll('[data-row="'+k+'"] .tick').forEach(function(t){t.classList.toggle("on",v>=+t.dataset.m)});
+        var r=root.querySelector('input[type=range][data-k="'+k+'"]');if(+r.value!==v)r.value=v;
+        var n=root.querySelector('[data-num="'+k+'"]');if(document.activeElement!==n)n.value=v;
+        var got=a.bonus.filter(function(b){return v>=b[0]});
+        root.querySelector('[data-info="'+k+'"]').textContent=got.length+" of "+a.bonus.length+" milestones, next point worth "+a.per[i];
+        var nx=a.bonus.filter(function(b){return v<b[0]})[0];
+        root.querySelector('[data-next="'+k+'"]').innerHTML=nx?'Next at <b>'+nx[0]+'</b> ('+(nx[0]-v)+' more): '+bonusLines(nx[1]).map(mark).join(", "):'<span class="muted">Every milestone reached.</span>';
+        got.forEach(function(b){bonusLines(b[1]).forEach(function(l){unlocked.push({k:k,m:b[0],l:l})})});
+      });
+      root.querySelector("[data-total]").textContent="Points above the starting "+A.Str.lv0+" in each: "+fmt(spent)+".";
+      var trade=unlocked.filter(function(u){return TRADE.test(u.l)}),other=unlocked.filter(function(u){return !TRADE.test(u.l)});
+      var der=[];KEYS.forEach(function(k){var a=A[k],i=Math.max(0,Math.min(a.per.length-1,+S.attrs[k]-a.lv0));Object.keys(a.derived).forEach(function(c){der.push('<li><b>+'+fmt(Math.round(a.derived[c][i]))+'</b> '+esc((DERIVED[c]||c).toLowerCase())+' <span class="muted">(from '+App.ATTR[k][0]+')</span></li>')})});
+      root.querySelector("#sum").innerHTML=
+        '<h3 class="slot-h">Gathering and crafting</h3>'+(trade.length?'<ul class="sumlist trade">'+sum(trade)+'</ul>':'<p class="muted">Nothing yet. The first gathering bonus comes at 25 in any attribute.</p>')+
+        (der.length?'<h3 class="slot-h">Stats</h3><ul class="sumlist">'+der.join("")+'</ul>':'')+
+        '<details class="more"><summary>Combat and other bonuses ('+other.length+')</summary>'+(other.length?'<ul class="sumlist">'+sum(other)+'</ul>':'<p class="muted">None yet.</p>')+'</details>';
+      root.querySelector("#all").innerHTML=KEYS.map(function(k){
+        var a=A[k],v=+S.attrs[k];
+        return '<article class="acard" style="--a:'+App.ATTR[k][1]+'"><h3>'+App.ATTR[k][0]+' <span class="muted" style="font:400 .85rem var(--body)">'+v+'</span></h3><ol>'+a.bonus.map(function(b){
+          return '<li class="'+(v>=b[0]?'got':'not')+'"><b>'+b[0]+'</b><span>'+bonusLines(b[1]).map(mark).join("\n")+'</span></li>';
+        }).join("")+'</ol></article>';
+      }).join("");
+    }
+    function set(k,v){var a=A[k];S.attrs[k]=Math.max(a.lv0,Math.min(max(k),Math.round(+v)||a.lv0));App.save();update()}
+    update();
+    root.addEventListener("input",function(e){var t=e.target;if(t.type==="range"&&t.dataset.k)set(t.dataset.k,t.value)});
+    root.addEventListener("change",function(e){var t=e.target;if(t.dataset&&t.dataset.num)set(t.dataset.num,t.value)});
+    root.addEventListener("click",function(e){
+      var b=e.target.closest("[data-step]");if(b)set(b.dataset.k,+S.attrs[b.dataset.k]+(+b.dataset.step));
+      if(e.target.id==="reset")KEYS.forEach(function(k){set(k,A[k].lv0)});
     });
   }).catch(function(e){root.innerHTML='<h1>Attributes</h1><p class="err">Data did not load ('+esc(e.message)+'). Reload the page.</p>'});
 }});
