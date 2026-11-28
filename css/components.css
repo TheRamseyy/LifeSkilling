@@ -471,3 +471,13 @@ h1 .savebtn{vertical-align:middle;font:600 .85rem var(--body);margin-left:8px}
 .saved .act{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
 .saved .act input{width:70px;margin-left:6px}
 @media (max-width:620px){button.discord{padding:6px 10px;font-size:.8rem}.acct .who span{display:none}}
+/* Noxie's build planner */
+.noxie{display:flex;flex-wrap:wrap;gap:16px 28px;align-items:center;justify-content:space-between}
+.noxie h2{margin:0 0 6px}
+.noxie p{margin:0;max-width:60ch}
+.noxie-go{display:flex;flex-direction:column;gap:8px;align-items:flex-start}
+.noxie-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(260px,100%),1fr));gap:12px}
+.noxie-grid .card{margin:0}
+.noxie-grid h3{margin:0 0 4px;font-size:1rem}
+.noxie-grid p{margin:0}
+.noxie a.btn{background:var(--accent);color:#1a0d0d}

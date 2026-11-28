@@ -2,6 +2,7 @@
 App.page("data/changelog",{title:"Changelog",render:function(root){
   var log=[
     ["28 Nov 2026",["The recipe chart is replaced by a crafting plan you read top to bottom: what to gather and buy (grouped by skill), then each crafting step as cards showing what to make, how many crafts, where, and what it needs. No more lines; hover what a card needs to see where it comes from.","Refining reagents (flux, sandpaper, tannin, solvent, wireweave) now count as bought by default, which also fixes a loop where Obsidian Flux and Obsidian Sandpaper each needed the other. Press “Craft it” to make them yourself."]],
+    ["28 Nov 2026",["New Builds section: Noxie’s build planner, what it covers and a link to open it."]],
     ["28 Nov 2026",["Security: the site now tells browsers to run only its own scripts and to talk only to itself and the sign-in service, and saved lists are capped at 1000 items."]],
     ["28 Nov 2026",["Sign in with Discord is now switched on: your saved recipes follow you to every device you sign in on."]],
     ["28 Nov 2026",["Saved recipes: press ☆ Save on any item (calculator or item page) and find it under Craft > Saved recipes, ready to add to the calculator. Kept on your device; Sign in with Discord (once set up) keeps them on every device."]],

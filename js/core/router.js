@@ -5,7 +5,7 @@ var esc=App.esc,DEFAULT="craft/calculator";
 // Pages register themselves: App.page("data/about", {title, needsData, render(el, param)})
 App.page=function(route,def){App.pages[route]=def};
 // Section colours (match --c-* in css/tokens.css) and a second colour for the sky
-var SEC={craft:["#5CE1E6","#B9A4FF"],gather:["#A6D97A","#5CE1E6"],gear:["#F2B45A","#FF8A5C"],data:["#F48FB1","#B9A4FF"]};
+var SEC={craft:["#5CE1E6","#B9A4FF"],gather:["#A6D97A","#5CE1E6"],gear:["#F2B45A","#FF8A5C"],data:["#F48FB1","#B9A4FF"],builds:["#FF7A7A","#F2B45A"]};
 // A page can give itself its own colour (a skill page, for example)
 App.accent=function(a,b){document.body.style.setProperty("--accent",a);App.sky.tint(a,b||a)};
 

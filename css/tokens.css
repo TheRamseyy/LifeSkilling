@@ -15,7 +15,7 @@
   --ember:#FF9F6B;  --ember-d:#86492C;  --ember-bg:rgba(255,159,107,.1);
 
   /* Section colours: what the menu, page glow and active controls use. Skills set their own on their pages. */
-  --c-craft:#5CE1E6;--c-gather:#A6D97A;--c-gear:#F2B45A;--c-data:#F48FB1;
+  --c-craft:#5CE1E6;--c-gather:#A6D97A;--c-gear:#F2B45A;--c-data:#F48FB1;--c-builds:#FF7A7A;
   --accent:var(--c-craft);
 
   --display:"Bahnschrift","DIN Alternate","Avenir Next Condensed","Roboto Condensed","Arial Narrow",system-ui,sans-serif;
@@ -29,6 +29,7 @@
 body[data-sec=gather]{--accent:var(--c-gather)}
 body[data-sec=gear]{--accent:var(--c-gear)}
 body[data-sec=data]{--accent:var(--c-data)}
+body[data-sec=builds]{--accent:var(--c-builds)}
 *{box-sizing:border-box}
 html{scroll-behavior:smooth;scroll-padding-top:80px}
 body{
