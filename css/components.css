@@ -334,7 +334,7 @@ mark.ts{background:color-mix(in srgb,var(--a) 18%,transparent);color:var(--mist)
 .ahead b{font:600 1.15rem var(--display);font-stretch:88%;color:var(--a);min-width:7.5em}
 .ahead .muted{font-size:.8rem}
 .actl{display:flex;align-items:center;gap:8px;margin-top:6px}
-.actl .step{width:32px;padding:4px 0;font-weight:700}
+.actl .astep{width:34px;height:34px;padding:0;display:grid;place-items:center;flex:none;font:700 1.1rem/1 var(--body)}
 .anum{width:74px;padding:6px 8px;text-align:center;font:600 1rem var(--display)}
 .slider{position:relative;flex:1;height:30px}
 .slider .track{position:absolute;left:8px;right:8px;top:12px;height:6px;border-radius:3px;background:rgba(15,20,38,.9);border:1px solid var(--line)}

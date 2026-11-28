@@ -32,10 +32,10 @@ App.page("gear/attributes",{title:"Attributes",render:function(root){
       var ticks=MILES.map(function(m){return '<span class="tick" data-m="'+m+'" style="left:'+((m-a.lv0)/(mx-a.lv0)*100)+'%" title="'+m+'"></span>'}).join("");
       return '<div class="arow" style="--a:'+col+'" data-row="'+k+'">'+
         '<div class="ahead"><b>'+App.ATTR[k][0]+'</b><span class="muted" data-info="'+k+'"></span></div>'+
-        '<div class="actl"><button type="button" class="sm step" data-step="-1" data-k="'+k+'" aria-label="One less '+App.ATTR[k][0]+'">−</button>'+
+        '<div class="actl"><button type="button" class="sm astep" data-step="-1" data-k="'+k+'" aria-label="One less '+App.ATTR[k][0]+'">−</button>'+
         '<div class="slider"><div class="track"><div class="fill" data-fill="'+k+'"></div>'+ticks+'</div>'+
         '<input type="range" min="'+a.lv0+'" max="'+mx+'" step="1" value="'+S.attrs[k]+'" data-k="'+k+'" aria-label="'+App.ATTR[k][0]+'"></div>'+
-        '<button type="button" class="sm step" data-step="1" data-k="'+k+'" aria-label="One more '+App.ATTR[k][0]+'">+</button>'+
+        '<button type="button" class="sm astep" data-step="1" data-k="'+k+'" aria-label="One more '+App.ATTR[k][0]+'">+</button>'+
         '<input type="number" class="anum" min="'+a.lv0+'" max="'+mx+'" value="'+S.attrs[k]+'" data-num="'+k+'" aria-label="'+App.ATTR[k][0]+' value"></div>'+
         '<div class="anext" data-next="'+k+'"></div></div>';
     }).join("");
