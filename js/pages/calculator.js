@@ -13,8 +13,8 @@ var HTML=''+
     '<div id="sugg" class="sugg" hidden></div>'+
     '<p class="muted" style="margin:8px 0 0">Type 2+ letters. Arrow keys move through results, Enter adds.</p></section>'+
   '<section class="card" aria-labelledby="h-list"><h2 id="h-list">Craft list</h2><div id="list"></div></section>'+
-  '<section class="card" id="flexcard" aria-labelledby="h-flex" hidden><h2 id="h-flex">Flexible materials</h2>'+
-    '<p class="muted" style="margin:0 0 10px">Some recipes accept any item of a type. Pick the one you will use: it is added to your totals, steps and gathering.</p><div id="flex"></div></section>'+
+  '<section class="card" id="flexcard" aria-labelledby="h-flex" hidden><h2 id="h-flex">Materials you can swap</h2>'+
+    '<p class="muted" style="margin:0 0 10px">Some recipes take any item of a type. The cheapest one by your prices is used, or the standard one if nothing is priced. Pick another to swap it everywhere.</p><div id="flex"></div></section>'+
 '</div><div class="res">'+
   '<section class="card" id="flowcard" aria-labelledby="h-flow"><h2 id="h-flow">Recipe flow</h2><div id="flow"></div><p class="note">Read it left to right: gather or buy what is on the left, craft each step, and end with what you are making. Hover or tab to a card to see everything it feeds into and everything it needs.</p></section>'+
   '<nav class="jump" aria-label="Results sections"><a href="#rawcard">Materials</a><a href="#gathcard">Gathering</a><a href="#stepcard">Steps</a><a href="#skillcard">Skills</a><a href="#stationcard">Stations</a><a href="#treecard">Tree</a></nav>'+
@@ -27,7 +27,7 @@ var HTML=''+
   '<section class="card" id="stationcard" aria-labelledby="h-st"><h2 id="h-st">Stations</h2><div id="stations"></div></section>'+
   '</div></div>'+
   '<section class="card" id="treecard" aria-labelledby="h-tree"><h2 id="h-tree">Breakdown tree <span class="act" id="treeact"><button class="sm" id="expall" type="button">Expand all</button><button class="sm" id="colall" type="button">Collapse all</button></span></h2>'+
-    '<div class="legend"><span class="b craft">crafted</span><span class="b raw">gather / raw</span><span class="b buy">bought</span><span class="b cat">chosen "any" item</span><span class="b warn">pick one</span></div><div id="tree"></div></section>'+
+    '<div class="legend"><span class="b craft">crafted</span><span class="b raw">gather / raw</span><span class="b buy">bought</span><span class="b cat">swappable "any" item</span></div><div id="tree"></div></section>'+
 '</div></div>';
 
 App.page("craft/calculator",{title:"Crafting calculator",needsData:true,render:function(root){
@@ -40,7 +40,13 @@ App.page("craft/calculator",{title:"Crafting calculator",needsData:true,render:f
   $("stat").textContent=fmt(D.craftCount)+" craftable items from "+fmt(D.R.length)+" recipes, read from the game files and not yet checked on Azoth.";
   var flow=App.Flow($("flow"));
 
-  function calc(){return NWCalc.expand(S.list,{byOut:byOut,cats:D.C,buy:S.buy,pick:S.pick})}
+  var route={pick:{},buy:{},auto:{buy:[],pick:[]}},sources=null;
+  // the cheapest route: "any X" choices and buy-instead-of-craft, from your prices and choices
+  function calc(){
+    route=NWCalc.bestRoute(S.list,{byOut:byOut,cats:D.C,prices:S.prices,buy:S.buy,pick:S.pick});
+    return NWCalc.expand(S.list,{byOut:byOut,cats:D.C,buy:route.buy,pick:route.pick});
+  }
+  function costOpt(){return {byOut:byOut,cats:D.C,prices:S.prices,buy:route.buy,pick:route.pick}}
   function stLabel(s){return NWCalc.stationLabel(s)}
 
   function renderList(){
@@ -53,12 +59,13 @@ App.page("craft/calculator",{title:"Crafting calculator",needsData:true,render:f
     names.forEach(function(id){
       var p=S.prices[id],cost=(p!=null&&p!=="")?p*c.raw[id]:null;if(cost!=null){t+=cost;pr++}
       var bought=!!byOut[id],gl=bought?[]:App.nodesFor(id),gh="",badge;
-      if(bought)badge='<span class="b buy">bought</span>';
+      var autoBuy=route.auto.buy.indexOf(id)>=0;
+      if(bought)badge=autoBuy?'<span class="b buy">bought: cheaper than crafting</span>':'<span class="b buy">bought</span>';
       else if(gl.length){
         badge='<span class="b raw">gather</span>';
         gh='<details class="nodes"><summary>Where to get it ('+gl.length+')</summary>'+gl.slice(0,8).map(function(x){return '<div>'+App.nodeLine(x.v)+'</div>'}).join("")+(gl.length>8?'<div>+'+(gl.length-8)+' more</div>':"")+'</details>';
-      }else{badge='<span class="b plain">other source</span>';gh='<div class="muted">No gathering node found. Likely a creature drop, chest, vendor, salvage or event item.</div>'}
-      h+='<div class="item"><span class="n">'+App.itemLink(id)+' '+badge+gh+'</span><span class="c">'+fmt(c.raw[id])+'</span><input class="price" type="number" min="0" step="any" placeholder="price ea." value="'+(p!=null?esc(p):"")+'" data-p="'+esc(id)+'" aria-label="Price of '+esc(nm(id))+'">'+(bought?'<button class="sm" data-craft="'+esc(id)+'">Craft it</button>':'')+'</div>';
+      }else{badge='<span class="b plain">other source</span>';gh='<div class="muted src" data-src="'+esc(id)+'">'+(sources?(App.sourceShort(sources[id])||'No shop, loot or quest listed in the game files.'):'Looking up where to get it…')+' '+App.itemLink(id,"Details")+'</div>'}
+      h+='<div class="item"><span class="n">'+App.itemLink(id)+' '+badge+gh+'</span><span class="c">'+fmt(c.raw[id])+'</span><input class="price" type="number" min="0" step="any" placeholder="price ea." value="'+(p!=null?esc(p):"")+'" data-p="'+esc(id)+'" aria-label="Price of '+esc(nm(id))+'">'+(bought&&!autoBuy?'<button class="sm" data-craft="'+esc(id)+'">Craft it</button>':'')+'</div>';
     });
     Object.keys(c.cat).forEach(function(id){
       h+='<div class="item"><span class="n">Any '+esc(nm(id))+' <span class="b warn">pick one</span><div class="muted">Choose which item you will use under Flexible materials to include it in gathering.</div></span><span class="c">'+fmt(c.cat[id])+'</span></div>';
@@ -67,6 +74,7 @@ App.page("craft/calculator",{title:"Crafting calculator",needsData:true,render:f
     if(names.length)h+='<div class="total"><span>Materials cost'+(pr<names.length?' <span class="muted">('+pr+' of '+names.length+' priced)</span>':'')+'</span><span id="tot">'+fmt(Math.round(t*100)/100)+'</span></div>';
     var fees=c.order.reduce(function(s,id){return s+(c.crafts[id].r.fee||0)*c.crafts[id].times},0);
     if(fees)h+='<div class="item"><span class="n muted">Crafting fees, before town tax</span><span class="c">'+fmt(fees)+'</span></div>';
+    if(route.auto.buy.length)h+='<p class="note">Cheapest route: '+route.auto.buy.map(function(id){return esc(nm(id))}).join(", ")+' '+(route.auto.buy.length>1?'are':'is')+' counted as bought, because the market price you entered is below the cost to craft. Clear that price to craft it instead.</p>';
     $("raw").innerHTML=h||'<div class="empty">Add something to craft to see materials.</div>';
     return names;
   }
@@ -80,30 +88,19 @@ App.page("craft/calculator",{title:"Crafting calculator",needsData:true,render:f
     $("gath").innerHTML=h?'<div class="grps">'+h+'</div><p class="note">Level is the lowest needed to reach every material, using the easiest node for each.</p>':'<div class="empty">No gathering needed.</div>';
   }
   function renderFlex(c){
-    var ck=Object.keys(c.catUsed).sort(function(a,b){return nm(a).localeCompare(nm(b))}),h="";
-    ck.forEach(function(id){
-      var opts=D.C[id]||[],ch=S.pick[id],nmid="pk_"+id.replace(/\W/g,"_");
-      h+='<fieldset class="pick"><legend>Any '+esc(nm(id))+' <span class="c">×'+fmt(c.catUsed[id])+'</span></legend>';
-      if(!opts.length)h+='<div class="muted">No item list for this category in the game files.</div>';
-      else if(opts.length<=12){
-        h+='<div class="muted">'+(ch?'Using '+esc(nm(ch)):'Not chosen yet: counted as "any" and left out of gathering.')+'</div><div class="chips" role="radiogroup" aria-label="Any '+esc(nm(id))+'">';
-        h+='<label><input type="radio" name="'+nmid+'" value="" data-cat="'+esc(id)+'"'+(ch?'':' checked')+'><span>Not decided</span></label>';
-        opts.forEach(function(o){h+='<label><input type="radio" name="'+nmid+'" value="'+esc(o)+'" data-cat="'+esc(id)+'"'+(o===ch?' checked':'')+'><span>'+esc(nm(o))+'</span></label>'});
-        h+='</div>';
-      }else{
-        h+='<label class="muted" for="'+nmid+'">'+opts.length+' items count. Pick the one you will use:</label><select id="'+nmid+'" data-cat="'+esc(id)+'"><option value="">Not decided</option>'+opts.map(function(o){return '<option value="'+esc(o)+'"'+(o===ch?' selected':'')+'>'+esc(nm(o))+'</option>'}).join("")+'</select>';
-      }
-      h+='</fieldset>';
-    });
-    $("flexcard").hidden=!ck.length;$("flex").innerHTML=h;
+    var ck=Object.keys(c.catUsed).sort(function(a,b){return nm(a).localeCompare(nm(b))});
+    $("flex").innerHTML=ck.map(function(id){
+      return '<div class="item"><span class="n">'+App.anyPicker(id,route.pick[id],route.auto.pick.indexOf(id)>=0)+'</span><span class="c">×'+fmt(c.catUsed[id])+'</span></div>';
+    }).join("");
+    $("flexcard").hidden=!ck.length;
   }
   function renderSteps(c){
     $("steps").innerHTML=c.order.map(function(id,i){
-      var x=c.crafts[id],r=x.r,cc=NWCalc.craftCost(id,{byOut:byOut,cats:D.C,prices:S.prices,buy:S.buy,pick:S.pick}),mp=S.prices[id],has=mp!=null&&mp!=="";
+      var x=c.crafts[id],r=x.r,cc=NWCalc.craftCost(id,costOpt()),mp=S.prices[id],has=mp!=null&&mp!=="";
       var cost='<span class="cost"><input class="price" type="number" min="0" step="any" placeholder="market price" value="'+(has?esc(mp):"")+'" data-mp="'+esc(id)+'" aria-label="Market price of one '+esc(nm(id))+'">'+
-        (cc.each!=null?'<span>Costs <b>'+fmt(Math.round(cc.each*100)/100)+'</b> each to craft</span>'+(has?(+mp<cc.each?' <span class="b buy">buying saves '+fmt(Math.round((cc.each-mp)*100)/100)+' each</span>':' <span class="b raw">crafting saves '+fmt(Math.round((mp-cc.each)*100)/100)+' each</span>'):''):
+        (cc.each!=null?'<span>Costs <b>'+fmt(Math.round(cc.each*100)/100)+'</b> each to craft</span>'+(has?(+mp<cc.each?' <span class="b buy">buying would save '+fmt(Math.round((cc.each-mp)*100)/100)+' each</span>':' <span class="b raw">crafting saves '+fmt(Math.round((mp-cc.each)*100)/100)+' each</span>'):''):
         '<span class="muted">Add prices for '+cc.missing.slice(0,3).map(function(m){return esc(/^any:/.test(m)?"any "+nm(m.slice(4)):nm(m))}).join(", ")+(cc.missing.length>3?' and '+(cc.missing.length-3)+' more':'')+' to see its cost</span>')+'</span>';
-      return '<div class="step"><span class="no">'+(i+1)+'</span><span><b>'+App.itemLink(id)+'</b><div class="muted">'+r.g.map(function(g){return g[2]+" "+(g[0]==="g"?"any ":"")+esc(nm(g[1]))}).join(" + ")+(r.o[1]>1?" → makes "+r.o[1]:"")+'</div></span>'
+      return '<div class="step"><span class="no">'+(i+1)+'</span><span><b>'+App.itemLink(id)+'</b><div class="muted ingl">'+r.g.map(function(g){return g[2]+" "+(g[0]==="g"?App.anyPicker(g[1],route.pick[g[1]],route.auto.pick.indexOf(g[1])>=0):esc(nm(g[1])))}).join(" + ")+(r.o[1]>1?" → makes "+r.o[1]:"")+'</div></span>'
         +'<span class="c">×'+fmt(x.times)+' <button class="sm" data-buy="'+esc(id)+'" title="Buy this instead of crafting it">Buy</button></span>'
         +'<span class="meta">'+(r.s||[]).map(function(s,j){return (j?'<span class="muted">or</span> ':'')+'<span class="b craft">'+esc(stLabel(s))+'</span>'}).join(" ")+(r.t?'<span class="b plain">'+esc(r.t)+' '+(r.l||0)+'</span>':'')+(r.fee?'<span class="b plain">fee '+fmt(r.fee)+'</span>':'')+'</span>'+cost+'</div>';
     }).join("")||'<div class="empty">No crafting steps yet.</div>';
@@ -174,16 +171,18 @@ App.page("craft/calculator",{title:"Crafting calculator",needsData:true,render:f
     var c=calc(),b=this,txt=Object.keys(c.raw).sort(function(a,z){return c.raw[z]-c.raw[a]}).map(function(id){return c.raw[id]+" x "+nm(id)}).join("\n");
     if(navigator.clipboard)navigator.clipboard.writeText(txt).then(function(){b.textContent="Copied"},function(){b.textContent="Copy failed"});
   });
-  $("flex").addEventListener("change",function(e){
-    var id=e.target.dataset.cat;if(id==null)return;
-    if(e.target.value)S.pick[id]=e.target.value;else delete S.pick[id];
-    var name=e.target.name||e.target.id;App.save();render();
-    // keep keyboard focus on the same picker after re-render
-    var el=$("flex").querySelector(e.target.type==="radio"?'input[name="'+name+'"]:checked':'#'+name);if(el)el.focus();
+  // any "any X" picker on the page (swap card or crafting steps)
+  root.addEventListener("change",function(e){
+    var cat=e.target.dataset&&e.target.dataset.anypick;if(cat==null)return;
+    var box=e.target.closest("#flex")?"flex":"steps";
+    App.setPick(cat,e.target.value);render();
+    var el=$(box).querySelector('[data-anypick="'+CSS.escape(cat)+'"]');if(el)el.focus();
   });
   $("tree").addEventListener("toggle",function(e){var d=e.target;if(d.dataset&&d.dataset.p)openTree[d.dataset.p]=d.open},true);
   $("expall").addEventListener("click",function(){setAll(true)});
   $("colall").addEventListener("click",function(){setAll(false)});
   render();
+  // where to get materials that no node drops (loaded once, then the list refreshes)
+  App.loadJSON("sources.json").then(function(s){sources=s;if(root.isConnected)renderRaw(calc())}).catch(function(){});
 }});
 })();

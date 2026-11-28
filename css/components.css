@@ -308,3 +308,14 @@ table.cmp td.best{color:var(--azoth);font-weight:600}
 .pk .on{display:flex;flex-wrap:wrap;gap:4px}
 .gt.bst .gt-h,.gt.bst .gt-row{grid-template-columns:minmax(200px,1.4fr) 150px 190px 100px minmax(220px,2fr)}
 @media (max-width:900px){.gt.bst .gt-row{grid-template-columns:1fr 1fr 1fr}}
+
+/* "Any X" swap picker */
+.anyw{display:inline-flex;align-items:center;gap:6px;flex-wrap:wrap;vertical-align:middle}
+.anyl{font-size:.8rem;color:var(--cat)}
+select.anypick{padding:3px 8px;font-size:.86rem;border-radius:8px;border-color:color-mix(in srgb,var(--cat) 45%,var(--line2));background:color-mix(in srgb,var(--cat) 8%,var(--deep));color:var(--mist);max-width:100%}
+.ingl{line-height:2}
+/* Sources lists */
+.srcl{margin:4px 0 10px;padding-left:18px}.srcl li{margin:3px 0}
+.src{margin-top:4px}
+/* Item page: two columns on wide screens */
+@media (min-width:1180px){.item-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:0 40px;align-items:start}}

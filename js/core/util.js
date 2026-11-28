@@ -32,5 +32,43 @@ App.boostTable=function(all,skill){
       return '<div class="gt-r"><div class="gt-row" role="row"><span class="gt-n" role="cell">'+name+'</span><span role="cell" data-l="Type">'+App.esc(SRC[b.src]||b.src)+'</span><span class="gt-p" role="cell"><b>'+App.esc(val)+'</b></span><span role="cell" data-l="Lasts">'+lasts+'</span><span role="cell" class="muted">'+note+'</span></div></div>';
     }).join("")+'</div>';
 };
+// "Any X" ingredients: the item you chose, else the standard (first) item
+App.currentPick=function(cat){var m=(App.data.C[cat]||[]),p=App.state.pick[cat];return p&&m.indexOf(p)>=0?p:m[0]};
+App.setPick=function(cat,item){if(item)App.state.pick[cat]=item;else delete App.state.pick[cat];App.save()};
+// A drop-down showing the item used for an "any X" ingredient, with every alternative and its cost where known
+App.anyPicker=function(cat,chosen,auto){
+  var D=App.data,mem=D.C[cat]||[],own=App.state.pick[cat];chosen=chosen||App.currentPick(cat);
+  if(!mem.length)return 'Any '+App.esc(App.nm(cat));
+  function cost(m){
+    var p=App.state.prices[m];if(p!=null&&p!==""&&!D.byOut[m])return +p;
+    var c=NWCalc.craftCost(m,{byOut:D.byOut,cats:D.C,prices:App.state.prices,buy:App.state.buy,pick:App.state.pick}).each;
+    return c!=null?c:(p!=null&&p!==""?+p:null);
+  }
+  return '<span class="anyw"><span class="anyl">any '+App.esc(App.nm(cat))+':</span><select class="anypick" data-anypick="'+App.esc(cat)+'" aria-label="Item to use for any '+App.esc(App.nm(cat))+'">'+
+    (own?'<option value="">Automatic choice</option>':'')+
+    mem.map(function(m,i){var c=cost(m);return '<option value="'+App.esc(m)+'"'+(m===chosen?' selected':'')+'>'+App.esc(App.nm(m))+(c!=null?' · '+App.fmt(Math.round(c*100)/100)+' each':'')+(i===0?' · standard':'')+'</option>'}).join("")+
+    '</select>'+(auto?'<span class="b raw" title="Cheapest by your prices">cheapest</span>':'')+'</span>';
+};
+// Where an item comes from besides crafting and gathering nodes (data/sources.json)
+App.sourceShort=function(s){
+  if(!s)return "";var bits=[];
+  if(s.shop)bits.push("faction shop, "+App.fmt(s.shop[0][1])+" tokens");
+  if(s.loot){var k=s.loot.filter(function(l){return l[0]!=="Other loot"});(k.length?k:s.loot).slice(0,2).forEach(function(l){bits.push(l[0].toLowerCase()+(l[1][0]?" ("+l[1][0]+(l[2]>1?" and more":"")+")":""))})}
+  if(s.salvage)bits.push("salvaging "+s.salvage[0][0]);
+  if(s.quest)bits.push("quest rewards");
+  return bits.length?"Get it from: "+App.esc(bits.join("; "))+".":"";
+};
+App.sourceDetail=function(s){
+  if(!s)return "";var h="",esc=App.esc;
+  if(s.shop)h+='<h3 class="slot-h">Shops</h3><ul class="srcl">'+s.shop.map(function(x){return '<li><b>'+App.fmt(x[1])+'</b> '+esc(x[0])+(x[2]?' <span class="muted">(needs '+esc(x[2])+')</span>':'')+'</li>'}).join("")+'</ul>';
+  if(s.salvage)h+='<h3 class="slot-h">Salvage'+App.unsure("Read from the salvage tables. What a salvage actually gives can vary and is not confirmed.")+'</h3><p>Salvaging '+s.salvage[0].map(esc).join(", ")+(s.salvage[1]>s.salvage[0].length?' and '+(s.salvage[1]-s.salvage[0].length)+' more':'')+' can give it.</p>';
+  if(s.quest)h+='<h3 class="slot-h">Quests</h3><p>A reward from '+s.quest+' quest step'+(s.quest>1?'s':'')+'.</p>';
+  if(s.loot){
+    var k=s.loot.filter(function(l){return l[0]!=="Other loot"});if(!k.length)k=s.loot;
+    h+='<h3 class="slot-h">Can drop from'+App.unsure("Loot tables list what can drop, not chances or amounts. Some drops also depend on creature level, region or events, which this list does not check.")+'</h3><ul class="srcl">'+k.map(function(l){return '<li><b>'+esc(l[0])+'</b>: '+l[1].map(esc).join(", ")+(l[2]>l[1].length?' and '+(l[2]-l[1].length)+' more':'')+'</li>'}).join("")+'</ul>';
+  }
+  if(s.tags)h+='<p class="muted">Loot tags: '+s.tags.map(function(t){return '<span class="b plain">'+esc(NWCalc.pretty(t))+'</span>'}).join(" ")+'</p>';
+  return h;
+};
 App.nodeLine=function(v){return '<b>'+App.esc(v[0])+'</b>, '+App.esc(v[1])+(v[2]?' level '+v[2]:'')+', respawns in '+App.dur(v[3],1)+'–'+App.dur(v[4])+', takes '+App.dur(v[5])+' to gather'};
 })();

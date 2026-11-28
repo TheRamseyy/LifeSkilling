@@ -71,3 +71,22 @@ test("a bought ingredient uses its price instead of being crafted", () => {
   const r = byOut.IngotT3[0];
   assert.strictEqual(c.each, (3 * 3 + 20 + 2 * 1 + r.fee) / r.o[1]);
 });
+
+test("cheapest route: standard item for 'any' when nothing is priced", () => {
+  const r = C.bestRoute([{ id: "CharcoalT1", qty: 10 }], { byOut, cats });
+  assert.strictEqual(r.pick.Wood, cats.Wood[0]);
+  assert.deepStrictEqual(r.auto, { buy: [], pick: [] });
+});
+
+test("cheapest route: picks the cheapest priced 'any' item and keeps your own choice", () => {
+  const prices = { WoodT1: 1, WoodT2: 0.1 };
+  assert.strictEqual(C.bestRoute([{ id: "CharcoalT1", qty: 10 }], { byOut, cats, prices }).pick.Wood, "WoodT2");
+  assert.strictEqual(C.bestRoute([{ id: "CharcoalT1", qty: 10 }], { byOut, cats, prices, pick: { Wood: "WoodT1" } }).pick.Wood, "WoodT1");
+});
+
+test("cheapest route: buys an ingredient whose market price is below its craft cost", () => {
+  // Iron Ingot costs 4 x 1 + 1 fee = 5 to craft; at a market price of 2 it is cheaper to buy
+  const r = C.bestRoute([{ id: "IngotT3", qty: 1 }], { byOut, cats, prices: { OreT1: 1, IngotT2: 2 } });
+  assert.ok(r.buy.IngotT2);
+  assert.deepStrictEqual(r.auto.buy, ["IngotT2"]);
+});

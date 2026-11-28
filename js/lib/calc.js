@@ -91,6 +91,37 @@ function unitPrice(id,opt,seen){
   return c.each==null&&has?{each:+p,missing:[]}:c;// a craftable item with a price falls back to that price if its parts are not all priced
 }
 
-var api={craftCost:craftCost,indexRecipes:indexRecipes,expand:expand,station:station,stationLabel:stationLabel,nodesFor:nodesFor,pretty:pretty};
+/* Cheapest route for a craft list, from your prices.
+   opt: {byOut, cats, prices, buy (your choices), pick (your choices)}.
+   Returns {pick, buy, auto}: pick = item used for every "any X" in the list (your choice, else the cheapest
+   priced item, else the standard first item); buy = your buys plus crafted items whose market price is
+   below their cost to craft; auto = {buy:[ids], pick:[cat ids]} chosen here rather than by you. */
+function bestRoute(list,opt){
+  var cats=opt.cats||{},prices=opt.prices||{},userPick=opt.pick||{},pick={},buy=Object.assign({},opt.buy||{}),auto={buy:[],pick:[]};
+  function has(id){var p=prices[id];return p!=null&&p!==""}
+  Object.keys(cats).forEach(function(k){var mem=cats[k],u=userPick[k];pick[k]=u&&mem.indexOf(u)>=0?u:mem[0]});
+  // which "any X" the list uses, with the standard items for now
+  var used=expand(list,{byOut:opt.byOut,cats:cats,buy:buy,pick:pick}).catUsed;
+  Object.keys(used).forEach(function(k){
+    if(userPick[k]&&cats[k].indexOf(userPick[k])>=0)return;
+    var best=null,bc=Infinity;
+    cats[k].forEach(function(m){
+      var c=has(m)&&!opt.byOut[m]?+prices[m]:craftCost(m,{byOut:opt.byOut,cats:cats,prices:prices,buy:buy,pick:pick}).each;
+      if(c==null&&has(m))c=+prices[m];
+      if(c!=null&&c<bc){bc=c;best=m}
+    });
+    if(best&&best!==pick[k]){pick[k]=best;auto.pick.push(k)}
+  });
+  // crafted items that are cheaper to buy at the market price you entered
+  var r=expand(list,{byOut:opt.byOut,cats:cats,buy:buy,pick:pick});
+  Object.keys(r.crafts).forEach(function(id){
+    if(buy[id]||!has(id))return;
+    var c=craftCost(id,{byOut:opt.byOut,cats:cats,prices:prices,buy:buy,pick:pick}).each;
+    if(c!=null&&+prices[id]<c){buy[id]=1;auto.buy.push(id)}
+  });
+  return {pick:pick,buy:buy,auto:auto};
+}
+
+var api={bestRoute:bestRoute,craftCost:craftCost,indexRecipes:indexRecipes,expand:expand,station:station,stationLabel:stationLabel,nodesFor:nodesFor,pretty:pretty};
 if(typeof module!=="undefined"&&module.exports)module.exports=api;else root.NWCalc=api;
 })(this);
