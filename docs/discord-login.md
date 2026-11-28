@@ -55,6 +55,9 @@ create policy "change own saves" on public.user_saves
   for update using (auth.uid() = user_id) with check (auth.uid() = user_id);
 create policy "delete own saves" on public.user_saves
   for delete using (auth.uid() = user_id);
+
+-- signed-in people may use the table (the rules above still limit them to their own row)
+grant select, insert, update, delete on public.user_saves to authenticated;
 ```
 
 ## 5. Put the two public values in the site

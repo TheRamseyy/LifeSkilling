@@ -93,7 +93,8 @@ document.addEventListener("click",function(e){
 session=ON?load():null;
 draw();
 if(ON&&session){
-  ready().then(function(){return call("/auth/v1/user")}).then(function(u){user=u;draw();return pull()})
-    .catch(function(e){if(!user){store(null);draw()}App.syncNote="Could not reach the sign-in service ("+e.message+")."});
+  ready().then(function(){return call("/auth/v1/user")}).then(function(u){user=u;draw();
+      return pull().catch(function(e){App.syncNote="Could not load your online saves ("+e.message+"). Your saves on this device still work.";if(App.onSaved)App.onSaved()})})
+    .catch(function(e){if(!user){store(null);draw()}App.syncNote="Could not reach the sign-in service ("+e.message+").";if(App.onSaved)App.onSaved()});
 }
 })();

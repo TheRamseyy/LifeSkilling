@@ -3,6 +3,6 @@
 // the table's row-level security stops anyone reading or changing someone else's saves.
 // Leave them empty and the site works as before, with saves kept on this device only.
 App.SUPABASE={
-  url:"",// e.g. "https://abcdefghijkl.supabase.co"
-  key:""// the "anon public" key (or "publishable" key)
+  url:"https://mmzbgmdmlcivxvrpxvir.supabase.co",
+  key:"sb_publishable_RLYb9Rejf8cXzc0X-Q1yIg_9jvkyAsh"// publishable key: public by design
 };
