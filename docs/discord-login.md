@@ -58,6 +58,10 @@ create policy "delete own saves" on public.user_saves
 
 -- signed-in people may use the table (the rules above still limit them to their own row)
 grant select, insert, update, delete on public.user_saves to authenticated;
+
+-- keep each person's saves small (a list of at most 1000 items)
+alter table public.user_saves add constraint saved_is_small
+  check (jsonb_typeof(saved) = 'array' and jsonb_array_length(saved) <= 1000 and pg_column_size(saved) < 200000);
 ```
 
 ## 5. Put the two public values in the site

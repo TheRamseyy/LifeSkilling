@@ -61,7 +61,7 @@ function pull(){
 App.isSaved=function(id){return S.saved.some(function(x){return x.id===id})};
 App.toggleSaved=function(id){
   if(App.isSaved(id))S.saved=S.saved.filter(function(x){return x.id!==id});
-  else S.saved.unshift({id:id,t:Date.now()});
+  else{S.saved.unshift({id:id,t:Date.now()});S.saved=S.saved.slice(0,1000)}// the database allows up to 1000 saves
   App.save();push();
 };
 // a Save button for any item; clicks anywhere on the page are handled below
