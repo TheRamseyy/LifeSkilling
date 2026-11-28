@@ -17,3 +17,9 @@ All files are made from the game's extracted data tables:
 Rebuild all eight with the commands in [docs/updating-data.md](../docs/updating-data.md).
 
 Loot tables say which items a node can drop, not chances or amounts. Nothing here has map coordinates.
+
+## Where gathering gear drops
+
+| File | What | How it is built |
+|---|---|---|
+| `drops.json` | Every gathering tool, clothing piece and bag that can drop: item id to name, skills, slot, tier, gear score and routes. A route has its kind (Creatures, Chests and containers, Expeditions and raids, Events, Fishing), the creature level range `lv`, lowest enemy and player level, creature tags needed, the most common creatures with their levels, the number of creature kinds, the zones with most spawn points, and chest or loot names. No drop chances. | First `nwbt.exe pull slices` (creature spawn levels and zones), then `python tools/build_drops.py <datatables folder> <en-us.json> C:/nw/nw-buddy/.nwbt/pull/generated data/drops.json` (after `build_gear.py`). |
