@@ -80,7 +80,11 @@ def random_slots(r):
             p = (buckets.get(b) or {}).get(f"Perk{k}")
             if p and p in perks and p not in pool:
                 pool.append(p)
+    random_slots.last = pool
     return len(bs), [loc(perks[p].get("DisplayName")) or p for p in pool]
+
+
+tool_perks = {}  # perk id -> skills of the tools it can roll on
 
 
 def skill_of(pid):
@@ -135,6 +139,9 @@ for iid, (src, r) in items.items():
                     pk=[[p] + perk_text(p, gs) for p in item_perks(r) if p in perks],
                     rs=slots, pool=pool)
         out["skills"][skill]["tools"].append(base)
+        for p in item_perks(r) + random_slots.last:
+            if p in perks:
+                tool_perks.setdefault(p, set()).add(skill)
         continue
     slot = next((label for c, label in SLOTS if c in cls), None)
     allp = item_perks(r) + [canon.get(r[f"PerkSlot{n}"].lower(), r[f"PerkSlot{n}"]) for n in range(1, 6) if r.get(f"PerkSlot{n}")]
@@ -160,6 +167,8 @@ for s in out["crafting"].values():
 for s in out["skills"].values():
     s["tools"].sort(key=lambda x: (-x["sp"], -x["gs"], x["n"]))
     s["wear"].sort(key=lambda x: (x["slot"], -(x["pk"][0][3] or 0), -x["gs"], x["n"]))
+# Every perk a tool can have (listed or random), worked out at gear score 700, with the skills it appears on
+out["toolPerks"] = sorted(([p] + perk_text(p, 700) + [sorted(sk)] for p, sk in tool_perks.items() if perk_text(p, 700)), key=lambda x: x[1])
 json.dump(out, open(OUT, "w", encoding="utf-8"), separators=(",", ":"), ensure_ascii=False)
 print({k: (len(v["tools"]), len(v["wear"])) for k, v in out["skills"].items()})
 print({k: len(v["wear"]) for k, v in out["crafting"].items()})
