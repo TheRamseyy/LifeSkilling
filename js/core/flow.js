@@ -39,22 +39,35 @@ App.Flow=function(box){
     var col={};
     function height(k){if(k in col)return col[k];col[k]=0;var h=kids[k].length?1+Math.max.apply(null,kids[k].map(height)):0;return col[k]=h}
     all.forEach(height);
-    var ncol=Math.max.apply(null,all.map(function(k){return col[k]}))+1,cols=[];
-    for(var i=0;i<ncol;i++)cols.push([]);
+    var ncol=Math.max.apply(null,all.map(function(k){return col[k]}))+1;
     // what you craft sits in the last column, unless it is also an ingredient of something else on the list
     c.tree.forEach(function(n){var k=key(n);if(!edges.some(function(e){return e[0]===k}))col[k]=ncol-1});
-    all.forEach(function(k){cols[col[k]].push(k)});
-    cols.forEach(function(l){l.sort(function(a,b){return nodes[b].qty-nodes[a].qty})});
-
-    // Fewer crossings: order each column by the average position of its neighbours, a few passes each way
-    var pos={},parents={};
+    var parents={};
     edges.forEach(function(e){(parents[e[0]]=parents[e[0]]||[]).push(e[1])});
-    function index(){cols.forEach(function(l){l.forEach(function(k,i){pos[k]=i-(l.length-1)/2})})}
+
+    // Lanes: one per crafting skill. A raw material joins the lane of the craft that uses most of it,
+    // so most lines run along their own lane instead of across the chart.
+    var lane={};
+    all.forEach(function(k){var n=nodes[k];if(n.kind==="craft")lane[k]=(n.r&&n.r.t)||"Other"});
+    all.forEach(function(k){
+      if(lane[k])return;
+      var ps=(parents[k]||[]).slice().sort(function(a,b){return nodes[b].qty-nodes[a].qty});
+      lane[k]=ps.length?lane[ps[0]]:"Other";
+    });
+    var lanes={};
+    all.forEach(function(k){var L=lanes[lane[k]]=lanes[lane[k]]||{name:lane[k],cols:[],min:99,max:0};
+      (L.cols[col[k]]=L.cols[col[k]]||[]).push(k);if(nodes[k].kind==="craft"){L.min=Math.min(L.min,col[k]);L.max=Math.max(L.max,col[k])}});
+    // refining lanes (early columns) first, what you are making last
+    var order=Object.keys(lanes).sort(function(a,b){return lanes[a].max-lanes[b].max||lanes[a].min-lanes[b].min||a.localeCompare(b)});
+
+    // Fewer crossings: order each lane's columns by the average position of their neighbours
+    var pos={};
+    function index(){var y=0;order.forEach(function(n){var L=lanes[n],rows=0;L.cols.forEach(function(l){if(l){l.forEach(function(k,i){pos[k]=y+i});rows=Math.max(rows,l.length)}});y+=rows+1})}
     function avg(l){return l&&l.length?l.reduce(function(s,k){return s+pos[k]},0)/l.length:null}
     index();
     for(var pass=0;pass<4;pass++){
-      for(i=1;i<ncol;i++){reorder(cols[i],kids)}
-      for(i=ncol-2;i>=0;i--){reorder(cols[i],parents)}
+      order.forEach(function(n){lanes[n].cols.forEach(function(l){if(l)reorder(l,kids)})});
+      order.forEach(function(n){lanes[n].cols.slice().reverse().forEach(function(l){if(l)reorder(l,parents)})});
     }
     function reorder(l,by){
       var v={};l.forEach(function(k){var a=avg(by[k]);v[k]=a==null?pos[k]:a});
@@ -64,23 +77,29 @@ App.Flow=function(box){
     // cards shrink to fit the width (down to 150px), then the chart scrolls sideways
     var avail=(box.clientWidth||1200)-34;lastW=box.clientWidth;
     GAP=ncol>6?44:64;W=Math.max(150,Math.min(230,Math.floor((avail-(ncol-1)*GAP)/ncol)));
-    var rows=Math.max.apply(null,cols.map(function(l){return l.length})),width=ncol*W+(ncol-1)*GAP,height2=TOP+rows*ROW;
-    var xy={};
-    cols.forEach(function(l,ci){var off=(rows-l.length)/2;l.forEach(function(k,ri){xy[k]={x:ci*(W+GAP),y:TOP+(off+ri)*ROW}})});
+    var LANEHEAD=26,LANEGAP=14,width=ncol*W+(ncol-1)*GAP,xy={},bands=[],y=TOP;
+    order.forEach(function(n){
+      var L=lanes[n],rows=0;L.cols.forEach(function(l){if(l)rows=Math.max(rows,l.length)});// columns can be empty
+      bands.push({n:n,y:y,h:LANEHEAD+rows*ROW});
+      L.cols.forEach(function(l,ci){if(l)l.forEach(function(k,ri){xy[k]={x:ci*(W+GAP),y:y+LANEHEAD+ri*ROW}})});
+      y+=LANEHEAD+rows*ROW+LANEGAP;
+    });
+    var height2=y;
 
     var h='<div class="fl-in" style="width:'+width+'px;height:'+height2+'px">';
+    h+=bands.map(function(L){var c=App.SKILL_COL[L.n]||"#97A0BD";return '<div class="fl-lane" style="top:'+L.y+'px;height:'+L.h+'px;--c:'+c+'"><span>'+esc(L.n)+'</span></div>'}).join("");
     h+='<svg class="fl-svg" width="'+width+'" height="'+height2+'" aria-hidden="true">'+edges.map(function(e){
       var a=xy[e[0]],b=xy[e[1]],x1=a.x+W,y1=a.y+ROW/2-4,x2=b.x,y2=b.y+ROW/2-4,mx=(x1+x2)/2;
       return '<path class="fe k-'+nodes[e[0]].kind+'" data-a="'+esc(e[0])+'" data-b="'+esc(e[1])+'" d="M'+x1+','+y1+' C'+mx+','+y1+' '+mx+','+y2+' '+x2+','+y2+'"/>';
     }).join("")+'</svg>';
-    cols.forEach(function(l,ci){
+    for(var ci=0;ci<ncol;ci++){
       var t=ci===0?"Gather or buy":ci===ncol-1?"What you craft":"Step "+ci;
       h+='<div class="fl-col" style="left:'+ci*(W+GAP)+'px;width:'+W+'px">'+t+'</div>';
-    });
+    }
     all.forEach(function(k){
       var n=nodes[k],p=xy[k],sub;
       if(n.kind==="craft"){var st=(n.r.s||[])[0];sub=fmt(c.crafts[n.id].times)+" craft"+(c.crafts[n.id].times>1?"s":"")+(st?", "+esc(NWCalc.stationLabel(st)):"")}
-      else sub={raw:D.byOut[n.id]?"":(App.nodesFor(n.id).length?"gather":"other source"),buy:"bought",cat:"pick one in Flexible materials",cur:"currency"}[n.kind]||"";
+      else sub={raw:D.byOut[n.id]?"":(App.nodesFor(n.id).length?"gather":"other source"),buy:"bought",cat:"any",cur:"currency"}[n.kind]||"";
       var tag=(n.kind==="cat"||n.kind==="cur")?"div":"a",href=tag==="a"?' href="#/item/'+encodeURIComponent(n.id)+'"':' tabindex="0"';
       h+='<'+tag+' class="fn k-'+n.kind+'"'+href+' data-k="'+esc(k)+'" style="left:'+p.x+'px;top:'+p.y+'px;width:'+W+'px"><b>'+fmt(n.qty)+'×</b><span class="fl-n">'+esc(n.label)+'</span>'+(sub?'<small>'+sub+'</small>':'')+'</'+tag+'>';
     });
