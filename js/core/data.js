@@ -2,7 +2,7 @@
 (function(){
 "use strict";
 var loading=null;
-function get(f){return fetch("data/"+f).then(function(r){if(!r.ok)throw new Error(f);return r.json()})}
+function get(f){return fetch("data/"+f+"?v="+(document.documentElement.dataset.v||"")).then(function(r){if(!r.ok)throw new Error(f);return r.json()})}
 App.loadData=function(){
   if(loading)return loading;
   loading=Promise.all([get("recipes.json"),get("names.json"),get("cats.json"),get("gather.json").catch(function(){return {n:{},b:{}}})]).then(function(d){

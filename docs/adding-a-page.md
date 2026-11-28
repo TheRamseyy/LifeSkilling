@@ -10,7 +10,7 @@ Every page is one file in `js/pages/`. The menu lives in `js/app.js`.
    `App.data` when the page draws.
 4. Put the page content inside `render`. Always pass text from the data
    through `App.esc(...)` so names cannot break the page.
-5. In `index.html`, add `<script src="js/pages/gear.js"></script>` with the
+5. In `index.html`, add `<script src="js/pages/gear.js?v=..."></script>` (same `?v=` tag as the other lines) with the
    other page lines.
 6. In `js/app.js`, find the menu entry (for example "Gathering gear by level"),
    remove `soon:1` and add `route:"gather/gear"`.
