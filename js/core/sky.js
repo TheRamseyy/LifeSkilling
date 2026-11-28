@@ -1,6 +1,8 @@
-// Live background: a slow aurora over a night sky with faint stars, drawn with WebGL behind every page.
-// Tinted with the colour of the section or skill you are on. Renders at low resolution and about 30 frames
-// a second, pauses when the tab is hidden, holds still for reduced motion, and simply does nothing without WebGL.
+// Live background: a moonlit night over Aeternum, drawn with WebGL behind every page. A large moon with a halo
+// and soft moonbeams, thin clouds lit at the edges, an aurora, stars, three mountain ridges fading into mist,
+// and drifting motes of Azoth light. The aurora, mist, motes and horizon glow take the colour of the section or
+// skill you are on. Renders at low resolution and about 30 frames a second, pauses when the tab is hidden, holds
+// still for reduced motion, and simply does nothing without WebGL.
 (function(){
 "use strict";
 var cv=document.createElement("canvas");cv.className="sky";cv.setAttribute("aria-hidden","true");
@@ -14,25 +16,64 @@ var FS=[
 "precision mediump float;",
 "uniform vec2 res;uniform float t;uniform vec3 c1;uniform vec3 c2;",
 "float h(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}",
+"float h1(float x){return fract(sin(x*91.17)*43758.5453);}",
 "float n(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);",
 " return mix(mix(h(i),h(i+vec2(1,0)),f.x),mix(h(i+vec2(0,1)),h(i+vec2(1,1)),f.x),f.y);}",
+"float n1(float x){float i=floor(x),f=fract(x);f=f*f*(3.-2.*f);return mix(h1(i),h1(i+1.),f);}",
 "float fbm(vec2 p){float v=0.,a=.5;for(int i=0;i<5;i++){v+=a*n(p);p=p*2.03+vec2(1.7,9.2);a*=.5;}return v;}",
+// a mountain skyline: folded noise gives sharp peaks
+"float ridge(float x,float s){float v=0.,a=.5;for(int i=0;i<5;i++){v+=a*(1.-abs(n1(x)*2.-1.));x=x*2.1+s;a*=.5;}return v;}",
 "void main(){",
 " vec2 uv=gl_FragCoord.xy/res;float asp=res.x/res.y;vec2 q=vec2(uv.x*asp,uv.y);",
-// night sky: deep blue-teal at the bottom, a little lighter at the top
-" vec3 col=mix(vec3(.045,.06,.11),vec3(.075,.095,.17),uv.y);",
-// aurora curtains: folded noise, strongest across the top third, drifting slowly
+// sky: deep navy above, a cold twilight band and a faint glow of the section colour at the horizon
+" vec3 col=mix(vec3(.05,.07,.13),vec3(.018,.024,.05),smoothstep(.15,1.,uv.y));",
+" col+=c1*.18*exp(-abs(uv.y-.32)*6.)+vec3(.05,.07,.12)*exp(-abs(uv.y-.32)*5.);",
+// moon: upper right, with craters, a darker limb and a wide halo
+" vec2 mp=vec2(asp*.86,.80);float mr=.075;vec2 d=q-mp;float md=length(d);",
+" float disk=smoothstep(mr,mr-.006,md);",
+" float crat=fbm(d*28.+3.)*.6+fbm(d*60.)*.4;",
+" vec3 moon=vec3(.72,.76,.86)*(.78+.22*smoothstep(.35,.75,crat))*(1.-.35*smoothstep(.0,mr,md));",
+" float halo=exp(-md*7.)*.45+exp(-md*22.)*.45;",
+" vec3 halocol=mix(vec3(.55,.65,.95),c2,.25);",
+// moonbeams: soft rays fanning down from the moon, slowly shifting
+" float ang=atan(d.y,d.x);float rays=pow(n(vec2(ang*7.,t*.05)),3.)*smoothstep(.0,-.6,d.y)*exp(-md*1.6);",
+// thin clouds drifting across, lit where they pass near the moon
+" float cl=fbm(vec2(q.x*1.6-t*.012,q.y*5.)+vec2(0.,fbm(q*2.+t*.01)));",
+" float cloud=smoothstep(.55,.85,cl)*smoothstep(.35,.7,uv.y)*smoothstep(1.,.75,uv.y);",
+// aurora: folded noise curtains across the upper sky in the section colour
 " float w=fbm(vec2(q.x*1.3+t*.015,q.y*.6-t*.01));",
 " float curtain=fbm(vec2(q.x*2.2+w*1.8+t*.03,q.y*1.2));",
-" float band=smoothstep(.25,.95,uv.y)*smoothstep(1.15,.55,uv.y+w*.2);",
-" float a=pow(curtain,1.9)*band;",
-" col+=c1*a*1.05+c2*pow(fbm(q*1.6-t*.012),2.6)*smoothstep(.0,.8,1.-uv.y)*.45;",
-// stars: sparse, twinkling, hidden behind the brightest aurora
-" vec2 g=floor(q*90.);float s=h(g);float tw=.5+.5*sin(t*1.3+s*40.);",
-" col+=vec3(.75,.82,1.)*step(.9965,s)*tw*(1.-a*1.5)*.6;",
-// soft vignette keeps edges calm behind the text
-" float v=smoothstep(1.25,.35,length((uv-vec2(.5,.62))*vec2(asp*.7,1.)));",
-" gl_FragColor=vec4(col*mix(.55,1.,v),1.);",
+" float au=pow(curtain,2.2)*smoothstep(.45,.95,uv.y)*smoothstep(1.2,.7,uv.y+w*.2)*1.15;",
+// stars: twinkling, hidden near the moon and behind clouds and aurora
+" vec2 sq=q*70.;vec2 g=floor(sq);float sr=h(g);float tw=.5+.5*sin(t*1.4+sr*40.);",
+" vec2 so=fract(sq)-.5-(vec2(h(g+7.),h(g+3.))-.5)*.6;float pt=smoothstep(.16,.0,length(so));",
+" float star=step(.985,sr)*pt*tw*(1.-smoothstep(.0,.25,halo))*(1.-cloud)*(1.-au)*smoothstep(.3,.6,uv.y);",
+" col+=vec3(.78,.85,1.)*star*.7;",
+" col+=c1*au*.9+c2*au*au*.4;",
+" col+=halocol*halo*.35+vec3(.6,.7,1.)*rays*.12;",
+" col=mix(col,vec3(.12,.14,.22)+halocol*halo*.25,cloud*.55);",
+" col+=vec3(.8,.85,1.)*cloud*exp(-md*4.)*.35;",
+" col=mix(col,moon,disk*(1.-cloud*.6));",
+// three mountain ridges, far to near, each darker, with mist drifting between them
+" float far=.30+ridge(q.x*1.1+3.,1.3)*.16;",
+" float mid=.20+ridge(q.x*1.7+11.,2.7)*.17;",
+" float near=.06+ridge(q.x*2.6+27.,5.1)*.16;",
+" float mist=fbm(vec2(q.x*1.5-t*.02,uv.y*3.+t*.01));",
+" vec3 fogc=mix(vec3(.10,.13,.22),c1*.45+vec3(.06,.08,.14),.5);",
+" float rim=exp(-md*1.2)*.5;",
+" if(uv.y<far){col=mix(vec3(.08,.10,.18)+halocol*rim*.1,fogc,.4);}",
+" if(uv.y<mid){col=mix(vec3(.04,.055,.10)+halocol*rim*.05,fogc,.22+.25*mist*smoothstep(mid-.12,mid,uv.y));}",
+" if(uv.y<near){col=vec3(.018,.024,.045)+fogc*.12*mist;}",
+// moonlight catching the far and middle skylines
+" col+=halocol*.25*rim*(smoothstep(.006,.0,abs(uv.y-far))+smoothstep(.006,.0,abs(uv.y-mid))*.7);",
+// Azoth motes: a few soft lights rising slowly in the section colour
+" vec2 mq=vec2(q.x*9.,uv.y*6.-t*.08);vec2 mc=floor(mq);float mh=h(mc);",
+" vec2 mo=fract(mq)-.5-vec2(sin(t*.3+mh*30.)*.25,(mh-.5)*.4);",
+" float mote=step(.86,mh)*exp(-dot(mo,mo)*90.)*(.6+.4*sin(t*2.+mh*50.))*smoothstep(.75,.1,uv.y);",
+" col+=c1*mote*.9;",
+// soft vignette keeps the edges calm behind the text
+" float v=smoothstep(1.3,.35,length((uv-vec2(.5,.6))*vec2(asp*.7,1.)));",
+" gl_FragColor=vec4(col*mix(.6,1.,v),1.);",
 "}"].join("\n");
 
 function sh(type,src){var s=gl.createShader(type);gl.shaderSource(s,src);gl.compileShader(s);return gl.getShaderParameter(s,gl.COMPILE_STATUS)?s:null}
@@ -47,7 +88,7 @@ var loc=gl.getAttribLocation(pr,"p");gl.enableVertexAttribArray(loc);gl.vertexAt
 var U={res:gl.getUniformLocation(pr,"res"),t:gl.getUniformLocation(pr,"t"),c1:gl.getUniformLocation(pr,"c1"),c2:gl.getUniformLocation(pr,"c2")};
 document.documentElement.classList.add("has-sky");
 
-var SCALE=.35;// render size relative to the screen; the soft look hides the low resolution
+var SCALE=.5;// render size relative to the screen; the soft look hides the low resolution
 function size(){cv.width=Math.max(160,Math.round(innerWidth*SCALE));cv.height=Math.max(120,Math.round(innerHeight*SCALE));gl.viewport(0,0,cv.width,cv.height);draw(last)}
 function rgb(hex){var n=parseInt(hex.slice(1),16);return [(n>>16&255)/255,(n>>8&255)/255,(n&255)/255]}
 var cur=[rgb("#5CE1E6"),rgb("#B9A4FF")],goal=cur.map(function(c){return c.slice()});
