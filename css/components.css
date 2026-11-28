@@ -332,3 +332,18 @@ select.anypick{padding:3px 8px;font-size:.86rem;border-radius:8px;border-color:c
   .prose li,.prose p{break-inside:avoid}
 }
 .chart{max-width:1100px;max-height:320px}
+/* Tools page */
+.tgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(420px,1fr));gap:14px}
+.tcard{padding:16px;border-radius:var(--r-l);background:linear-gradient(160deg,color-mix(in srgb,var(--a) 12%,rgba(30,38,66,.9)),rgba(20,26,46,.85));border:1px solid color-mix(in srgb,var(--a) 30%,var(--line))}
+.tcard h3{margin:0 0 2px;font:600 1.25rem var(--display);font-stretch:85%;color:var(--a)}
+.tcard .hands{font-size:.8rem;color:var(--mute)}
+table.tl{width:100%;border-collapse:collapse;margin-top:10px;font-size:.88rem}
+table.tl th{text-align:left;font-weight:500;color:var(--mute);font-size:.76rem;padding:4px 6px;border-bottom:1px solid var(--line)}
+table.tl td{padding:6px;border-bottom:1px solid rgba(46,57,88,.5)}
+table.tl a{color:var(--mist);text-decoration:none}table.tl a:hover{color:var(--a)}
+/* Attributes: gathering and crafting effects */
+.tradebox{margin:6px 0 4px;padding:10px 12px;border-radius:10px;background:color-mix(in srgb,var(--a) 10%,rgba(15,20,38,.6));border:1px solid color-mix(in srgb,var(--a) 30%,transparent)}
+.tradebox b{font:600 .86rem var(--display);color:var(--a)}
+.tradebox ul{list-style:none;margin:6px 0 0;padding:0;font-size:.86rem}
+.tradebox li{padding:2px 0}.tradebox li span{display:inline-block;min-width:2.6em;font-weight:600;color:var(--a)}
+mark.ts{background:color-mix(in srgb,var(--a) 18%,transparent);color:var(--mist);border-radius:4px;padding:0 3px}

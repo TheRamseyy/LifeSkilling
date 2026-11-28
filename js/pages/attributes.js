@@ -3,14 +3,17 @@
 "use strict";
 var esc=App.esc,fmt=App.fmt,S=App.state;
 var KEYS=["Str","Dex","Int","Foc","Con"];
+// words that mark a gathering or crafting effect in a milestone bonus
+var TRADE=/mining|logging|harvest|skinning|fishing|gather|craft|refin|smelt|weav|leather|wood|stone|cook|luck|yield|encumbrance|carry|weight/i;
+function bonusLines(t){return t.split("\n").map(function(l){return l.replace(/^\s*\u2022\s*/,"").trim()}).filter(Boolean)}
 var DERIVED={Health:"Health",Mana:"Mana",Stamina:"Stamina",HealthRate:"Health regeneration",ManaRate:"Mana regeneration",StaminaRate:"Stamina regeneration",EquipLoad:"Equip load",Encumbrance:"Carry weight",CastSpeed:"Cast speed"};
 
 App.page("gear/attributes",{title:"Attributes",render:function(root){
   root.innerHTML='<h1>Attributes</h1><p class="loading">Loading…</p>';
   App.loadJSON("weapons.json").then(function(W){
     function draw(){
-      var h='<h1>Attributes</h1><p class="sub">What Strength, Dexterity, Intelligence, Focus and Constitution do, the bonuses you unlock along the way, and how each extra point counts for a little less.</p>'+App.gearNav("gear/attributes");
-      h+='<section class="card glass" aria-labelledby="h-mine"><h2 id="h-mine">Your attributes</h2><p class="muted" style="margin:-4px 0 10px">Optional. Saved in this browser and used for the damage estimate on the Weapons page.</p><div class="mine">'+
+      var h='<h1>Attributes</h1><p class="sub">What Strength, Dexterity, Intelligence, Focus and Constitution do for gathering and crafting, the bonuses you unlock along the way, and how each extra point counts for a little less. Gathering tools do not scale with attributes; attributes help through these milestone bonuses.</p>'+App.gearNav("gear/attributes");
+      h+='<section class="card glass" aria-labelledby="h-mine"><h2 id="h-mine">Your attributes</h2><p class="muted" style="margin:-4px 0 10px">Optional. Saved in this browser and used to show which bonuses you have reached.</p><div class="mine">'+
         KEYS.map(function(k){return '<label style="--a:'+App.ATTR[k][1]+'">'+App.ATTR[k][0]+'<input type="number" min="5" max="500" inputmode="numeric" data-at="'+k+'" value="'+(S.attrs[k]!=null?esc(S.attrs[k]):"")+'" placeholder="5"></label>'}).join("")+'</div></section>';
 
       // Diminishing returns chart
@@ -27,19 +30,19 @@ App.page("gear/attributes",{title:"Attributes",render:function(root){
         '<svg class="chart" viewBox="0 0 '+w+' '+ht+'" role="img" aria-label="Value of each attribute point falls from '+A.per[0]+' at level '+lv0+' to '+A.per[n-1]+' at level '+(lv0+n-1)+'">'+
         '<line x1="'+pad+'" x2="'+(w-pad/2)+'" y1="'+(ht-pad+4)+'" y2="'+(ht-pad+4)+'" stroke="var(--line2)"/>'+lines+ticks+
         '<text x="'+pad+'" y="16">'+A.per[0]+' per point</text><text x="'+(w-pad/2)+'" y="'+(y(A.per[n-1])-8)+'" text-anchor="end">'+A.per[n-1]+' per point</text></svg>'+
-        '<p class="note">At level '+lv0+' a point is worth '+A.per[0]+'; by level '+(lv0+n-1)+' it is worth '+A.per[n-1]+'. Using this as the "effective points" behind damage scaling is how the estimate works'+App.unsure("The tables give these values; that they feed weapon scaling this way is the common reading, not confirmed.")+'.</p></section>';
+        '<p class="note">At level '+lv0+' a point is worth '+A.per[0]+'; by level '+(lv0+n-1)+' it is worth '+A.per[n-1]+'. From the attribute tables in the game files.</p></section>';
 
       // One card per attribute
       h+='<div class="attrs">'+KEYS.map(function(k){
         var name=App.ATTR[k][0],a=W.attrs[name],col=App.ATTR[k][1];
-        var main=W.types.filter(function(t){return t.main[0]===k}).map(function(t){return t.n}),sec=W.types.filter(function(t){return t.second[0]===k}).map(function(t){return t.n});
+        // the lines of its milestone bonuses that help gathering or crafting
+        var trade=[];a.bonus.forEach(function(b){bonusLines(b[1]).forEach(function(l){if(TRADE.test(l))trade.push([b[0],l])})});
         var mine=+S.attrs[k],i=mine?Math.max(0,Math.min(a.sum.length-1,mine-a.lv0)):null;
         var der=Object.keys(a.derived).map(function(c){var v=a.derived[c];return '<p class="muted" style="margin:4px 0">'+esc(DERIVED[c]||c)+': +'+fmt(v[1]-v[0])+' per point'+(i!=null?', <b style="color:var(--mist)">'+fmt(Math.round(v[i]))+'</b> at your '+mine:'')+'</p>'}).join("");
         return '<article class="acard" style="--a:'+col+'"><h3>'+esc(name)+'</h3>'+
-          (main.length?'<p class="muted" style="margin:0">Main attribute for: '+main.map(esc).join(", ")+'</p>':'')+
-          (sec.length?'<p class="muted" style="margin:4px 0 0">Second attribute for: '+sec.map(esc).join(", ")+'</p>':'')+der+
+          (trade.length?'<div class="tradebox"><b>For gathering and crafting</b><ul>'+trade.map(function(t){return '<li><span>'+t[0]+'</span> '+esc(t[1])+'</li>'}).join("")+'</ul></div>':'<p class="muted" style="margin:0">No gathering or crafting bonus.</p>')+der+
           (i!=null?'<p style="margin:8px 0 0">At '+mine+': <b>'+fmt(Math.round(a.sum[i]))+'</b> effective points'+App.unsure("Running total from the attribute table; how the game uses it is not confirmed.")+'</p>':'')+
-          '<ol>'+a.bonus.map(function(b){return '<li'+(mine&&mine>=b[0]?' style="opacity:1"':mine?' style="opacity:.55"':'')+'><b>'+b[0]+'</b><span>'+esc(b[1].replace(/^\s*•\s*/,"").replace(/\s*\n\s*•\s*/g,"\n"))+'</span></li>'}).join("")+'</ol></article>';
+          '<ol>'+a.bonus.map(function(b){return '<li'+(mine&&mine>=b[0]?' style="opacity:1"':mine?' style="opacity:.55"':'')+'><b>'+b[0]+'</b><span>'+bonusLines(b[1]).map(function(l){return TRADE.test(l)?'<mark class="ts">'+esc(l)+'</mark>':esc(l)}).join("\n")+'</span></li>'}).join("")+'</ol></article>';
       }).join("")+'</div>';
       h+='<p class="note">Milestone bonuses are read from the game\'s attribute ability table. Bonuses you have reached are shown brighter once you type your attributes.</p>';
       root.innerHTML=h;

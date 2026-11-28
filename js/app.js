@@ -5,7 +5,7 @@
 App.menu=[
   {label:"Craft",items:[{route:"craft/calculator",label:"Calculator"},{route:"craft/levelling",label:"Level a crafting skill"},{label:"Craft list",soon:1},{label:"Prices",soon:1}]},
   {label:"Gather",items:[{label:"Materials and nodes",soon:1},{route:"gather/gear",label:"Gathering gear by level"},{route:"gather/runs",label:"Run planner"}]},
-  {label:"Gear",items:[{route:"gear/weapons",label:"Weapons"},{route:"gear/attributes",label:"Attributes"},{route:"gear/perks",label:"Weapon perks"}]},
+  {label:"Gear",items:[{route:"gear/tools",label:"Tools"},{route:"gear/attributes",label:"Attributes"},{route:"gear/perks",label:"Tool perks"}]},
   {label:"Data",items:[{route:"data/about",label:"About the data"},{route:"data/limits",label:"Known limits"},{route:"data/changelog",label:"Changelog"}]}
 ];
 
