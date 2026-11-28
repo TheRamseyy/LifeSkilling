@@ -16,7 +16,7 @@ var HTML=''+
   '<section class="card" id="flexcard" aria-labelledby="h-flex" hidden><h2 id="h-flex">Materials you can swap</h2>'+
     '<p class="muted" style="margin:0 0 10px">Some recipes take any item of a type. The cheapest one by your prices is used, or the standard one if nothing is priced. Pick another to swap it everywhere.</p><div id="flex"></div></section>'+
 '</div><div class="res">'+
-  '<section class="card" id="flowcard" aria-labelledby="h-flow"><h2 id="h-flow">Recipe flow</h2><div id="flow"></div><p class="note">Read it left to right: gather or buy what is on the left, craft each step, and end with what you are making. Hover or tab to a card to see everything it feeds into and everything it needs.</p></section>'+
+  '<section class="card" id="flowcard" aria-labelledby="h-flow"><h2 id="h-flow">Crafting plan</h2><p class="muted" style="margin:-6px 0 12px">Do it top to bottom: gather and buy, then each step in order. It follows the cheapest route. Hover or tab to anything a card needs to see where it comes from.</p><div id="flow"></div></section>'+
   '<nav class="jump" aria-label="Results sections"><a href="#rawcard">Materials</a><a href="#gathcard">Gathering</a><a href="#stepcard">Steps</a><a href="#skillcard">Skills</a><a href="#stationcard">Stations</a><a href="#treecard">Tree</a></nav>'+
   '<div class="res2"><div>'+
   '<section class="card" id="rawcard" aria-labelledby="h-raw"><h2 id="h-raw">Raw materials to gather or buy <span class="act"><button class="sm" id="copyraw" type="button">Copy shopping list</button></span></h2><div id="raw"></div></section>'+
@@ -43,7 +43,7 @@ App.page("craft/calculator",{title:"Crafting calculator",needsData:true,render:f
   var route={pick:{},buy:{},auto:{buy:[],pick:[]}},sources=null;
   // the cheapest route: "any X" choices and buy-instead-of-craft, from your prices and choices
   function calc(){
-    route=NWCalc.bestRoute(S.list,{byOut:byOut,cats:D.C,prices:S.prices,buy:S.buy,pick:S.pick});
+    route=NWCalc.bestRoute(S.list,{byOut:byOut,cats:D.C,prices:S.prices,buy:S.buy,pick:S.pick,craft:S.craft});
     return NWCalc.expand(S.list,{byOut:byOut,cats:D.C,buy:route.buy,pick:route.pick});
   }
   function costOpt(){return {byOut:byOut,cats:D.C,prices:S.prices,buy:route.buy,pick:route.pick}}
@@ -59,8 +59,8 @@ App.page("craft/calculator",{title:"Crafting calculator",needsData:true,render:f
     names.forEach(function(id){
       var p=S.prices[id],cost=(p!=null&&p!=="")?p*c.raw[id]:null;if(cost!=null){t+=cost;pr++}
       var bought=!!byOut[id],gl=bought?[]:App.nodesFor(id),gh="",badge;
-      var autoBuy=route.auto.buy.indexOf(id)>=0;
-      if(bought)badge=autoBuy?'<span class="b buy">bought: cheaper than crafting</span>':'<span class="b buy">bought</span>';
+      var autoBuy=route.auto.buy.indexOf(id)>=0,reagent=route.auto.reagent.indexOf(id)>=0;
+      if(bought)badge=autoBuy?'<span class="b buy">bought: cheaper than crafting</span>':reagent?'<span class="b buy">bought: refining reagent</span>':'<span class="b buy">bought</span>';
       else if(gl.length){
         badge='<span class="b raw">gather</span>';
         gh='<details class="nodes"><summary>Where to get it ('+gl.length+')</summary>'+gl.slice(0,8).map(function(x){return '<div>'+App.nodeLine(x.v)+'</div>'}).join("")+(gl.length>8?'<div>+'+(gl.length-8)+' more</div>':"")+'</details>';
@@ -159,8 +159,8 @@ App.page("craft/calculator",{title:"Crafting calculator",needsData:true,render:f
   $("list").addEventListener("click",function(e){var b=e.target.closest("[data-rm]");if(!b)return;S.list.splice(+b.dataset.rm,1);App.save();render()});
   $("list").addEventListener("change",function(e){var i=e.target.dataset.q;if(i==null)return;S.list[+i].qty=Math.max(1,parseInt(e.target.value,10)||1);App.save();render()});
   $("raw").addEventListener("input",function(e){var id=e.target.dataset.p;if(id==null)return;if(e.target.value==="")delete S.prices[id];else S.prices[id]=parseFloat(e.target.value)||0;App.save();totalOnly();renderSteps(calc())});
-  $("raw").addEventListener("click",function(e){var b=e.target.closest("[data-craft]");if(!b)return;delete S.buy[b.dataset.craft];App.save();render()});
-  $("steps").addEventListener("click",function(e){var b=e.target.closest("[data-buy]");if(!b)return;S.buy[b.dataset.buy]=1;App.save();render()});
+  $("raw").addEventListener("click",function(e){var b=e.target.closest("[data-craft]");if(!b)return;var id=b.dataset.craft;delete S.buy[id];S.craft[id]=1;App.save();render()});
+  $("steps").addEventListener("click",function(e){var b=e.target.closest("[data-buy]");if(!b)return;var id=b.dataset.buy;S.buy[id]=1;delete S.craft[id];App.save();render()});
   $("steps").addEventListener("change",function(e){
     var id=e.target.dataset.mp;if(id==null)return;
     if(e.target.value==="")delete S.prices[id];else S.prices[id]=parseFloat(e.target.value)||0;

@@ -75,7 +75,7 @@ test("a bought ingredient uses its price instead of being crafted", () => {
 test("cheapest route: standard item for 'any' when nothing is priced", () => {
   const r = C.bestRoute([{ id: "CharcoalT1", qty: 10 }], { byOut, cats });
   assert.strictEqual(r.pick.Wood, cats.Wood[0]);
-  assert.deepStrictEqual(r.auto, { buy: [], pick: [] });
+  assert.deepStrictEqual(r.auto, { buy: [], pick: [], reagent: [] });
 });
 
 test("cheapest route: picks the cheapest priced 'any' item and keeps your own choice", () => {
@@ -89,4 +89,12 @@ test("cheapest route: buys an ingredient whose market price is below its craft c
   const r = C.bestRoute([{ id: "IngotT3", qty: 1 }], { byOut, cats, prices: { OreT1: 1, IngotT2: 2 } });
   assert.ok(r.buy.IngotT2);
   assert.deepStrictEqual(r.auto.buy, ["IngotT2"]);
+});
+
+test("refining reagents count as bought unless you choose to craft them", () => {
+  const list = [{ id: "IngotT3", qty: 10 }];
+  const a = C.bestRoute(list, { byOut, cats });
+  assert.ok(a.buy.FluxT5 && a.auto.reagent.includes("FluxT5"));
+  const b = C.bestRoute(list, { byOut, cats, craft: { FluxT5: 1 } });
+  assert.ok(!b.buy.FluxT5);
 });

@@ -92,13 +92,18 @@ function unitPrice(id,opt,seen){
 }
 
 /* Cheapest route for a craft list, from your prices.
-   opt: {byOut, cats, prices, buy (your choices), pick (your choices)}.
+   opt: {byOut, cats, prices, buy (your choices), pick (your choices), craft (items you chose to craft)}.
    Returns {pick, buy, auto}: pick = item used for every "any X" in the list (your choice, else the cheapest
    priced item, else the standard first item); buy = your buys plus crafted items whose market price is
    below their cost to craft; auto = {buy:[ids], pick:[cat ids]} chosen here rather than by you. */
+// Refining reagents (Obsidian Flux, Sandpaper, Aged Tannin, Pure Solvent, Wireweave) are normally bought.
+// Crafting them needs another reagent, and the standard choices need each other (Flux <-> Sandpaper).
+var REAGENT=/^(Flux|Sandpaper|Tannin|Solvent|Weave)T\d/;
 function bestRoute(list,opt){
-  var cats=opt.cats||{},prices=opt.prices||{},userPick=opt.pick||{},pick={},buy=Object.assign({},opt.buy||{}),auto={buy:[],pick:[]};
+  var cats=opt.cats||{},prices=opt.prices||{},userPick=opt.pick||{},craft=opt.craft||{},pick={},buy=Object.assign({},opt.buy||{}),auto={buy:[],pick:[],reagent:[]};
   function has(id){var p=prices[id];return p!=null&&p!==""}
+  // reagents count as bought unless you chose to craft them
+  Object.keys(opt.byOut).forEach(function(id){if(REAGENT.test(id)&&!craft[id]&&!buy[id]){buy[id]=1;auto.reagent.push(id)}});
   Object.keys(cats).forEach(function(k){var mem=cats[k],u=userPick[k];pick[k]=u&&mem.indexOf(u)>=0?u:mem[0]});
   // which "any X" the list uses, with the standard items for now
   var used=expand(list,{byOut:opt.byOut,cats:cats,buy:buy,pick:pick}).catUsed;
@@ -115,13 +120,16 @@ function bestRoute(list,opt){
   // crafted items that are cheaper to buy at the market price you entered
   var r=expand(list,{byOut:opt.byOut,cats:cats,buy:buy,pick:pick});
   Object.keys(r.crafts).forEach(function(id){
-    if(buy[id]||!has(id))return;
+    if(buy[id]||craft[id]||!has(id))return;
     var c=craftCost(id,{byOut:opt.byOut,cats:cats,prices:prices,buy:buy,pick:pick}).each;
     if(c!=null&&+prices[id]<c){buy[id]=1;auto.buy.push(id)}
   });
+  // only report the reagents this list actually uses
+  var raw=expand(list,{byOut:opt.byOut,cats:cats,buy:buy,pick:pick}).raw;
+  auto.reagent=auto.reagent.filter(function(id){return raw[id]});
   return {pick:pick,buy:buy,auto:auto};
 }
 
-var api={bestRoute:bestRoute,craftCost:craftCost,indexRecipes:indexRecipes,expand:expand,station:station,stationLabel:stationLabel,nodesFor:nodesFor,pretty:pretty};
+var api={REAGENT:REAGENT,bestRoute:bestRoute,craftCost:craftCost,indexRecipes:indexRecipes,expand:expand,station:station,stationLabel:stationLabel,nodesFor:nodesFor,pretty:pretty};
 if(typeof module!=="undefined"&&module.exports)module.exports=api;else root.NWCalc=api;
 })(this);
