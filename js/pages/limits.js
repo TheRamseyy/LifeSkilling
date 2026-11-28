@@ -12,7 +12,7 @@ App.page("data/limits",{title:"Known limits",render:function(root){
   '<li><b>Levelling routes</b> use the XP per craft and per level from the game files. XP boosts are not counted. Only recipes known by default are used, made from things you can gather plus refining reagents, which are counted as bought. Salvage research notes and gypsum recipes are left out because they need rare or daily-limited items.</li>'+
   '<li><b>Costs</b> only use the prices you type in. There are no market prices in the game files. Crafting fees are shown before town tax.</li>'+
   '<li><b>Weapon damage</b>: the files give base damage and how much each attribute adds per point, but no source confirms exactly how gear score, attributes and other bonuses combine into the number you see in game. The damage estimate is marked as not 100%.</li>'+
-  '<li><b>XP rates on Project Azoth</b> are not published. The optional double XP follows the official servers, which have had permanent double XP for characters, weapons, gathering and refining since 21 April 2026. Crafting skills such as Weaponsmithing were not listed.</li>'+
+  '<li><b>XP rates on Project Azoth</b> are not published. Official servers ran permanent double XP from April 2026; Project Azoth does not, so the planner uses base XP from the game files. Add your own extra XP if an event gives some.</li>'+
   '<li><b>Territory buffs</b> such as Miner\'s Resolve describe +20% yield, while their data value is 500 luck points (5%). Both are shown, marked not 100%.</li>'+
   '<li><b>Fishing spots</b> are not in the gathering data, so the gear page cannot list them by level.</li>'+
   '</ul></div>';

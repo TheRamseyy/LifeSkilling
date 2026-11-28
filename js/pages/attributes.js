@@ -25,7 +25,7 @@ App.page("gear/attributes",{title:"Attributes",render:function(root){
     var A={};KEYS.forEach(function(k){A[k]=W.attrs[App.ATTR[k][0]]});
     function max(k){return A[k].lv0+A[k].per.length-1}
 
-    var h='<h1>Attributes</h1><p class="sub">Set your attributes like on the in-game screen, including points from gear. Every milestone you reach lights up, and the panel adds up what they give you. Gathering tools do not scale with attributes; attributes help gathering and crafting through these milestone bonuses.</p>'+App.gearNav("gear/attributes");
+    var h='<h1>Attributes</h1><p class="sub">Set your attributes like on the in-game screen. Since Season 10, gear no longer adds attribute points (Season 10 patch notes); those points are part of the points you get from levelling. Every milestone you reach lights up, and the panel adds up what they give you. Gathering tools do not scale with attributes; attributes help gathering and crafting through these milestone bonuses.</p>'+App.gearNav("gear/attributes");
     h+='<div class="attr-layout"><section class="card glass attr-panel" aria-labelledby="h-set"><h2 id="h-set">Your attributes <span class="act"><button class="sm" type="button" id="reset">Reset to '+A.Str.lv0+'</button></span></h2>';
     h+=KEYS.map(function(k){
       var col=App.ATTR[k][1],a=A[k],mx=max(k);

@@ -97,7 +97,7 @@ function draw(root,skill,G){
 
   // Boosts
   h+='<section class="card" aria-labelledby="h-bst"><h2 id="h-bst">Boosts for '+esc(low)+'</h2><p class="muted" style="margin:-6px 0 12px">Food, housing trophies, territory buffs, music and attribute bonuses that help, from the game files. Luck is shown as a percentage: the game counts 100 luck points as 1%.</p>'+App.boostTable(G.boosts,skill)+
-    '<p class="note">Official servers have also had permanent double gathering XP since 21 April 2026 (<a href="https://www.mmorpg.com/news/new-world-aeternum-will-loosen-more-restrictions-turn-on-xp-bonus-to-let-remaining-players-access-content-2000137857" rel="noopener" target="_blank">MMORPG.com</a>)'+App.unsure("Project Azoth has not published its XP rates.")+'.</p></section>';
+    '</section>';
 
   // Endgame best in slot
   h+='<section class="card" aria-labelledby="h-bis"><h2 id="h-bis">Endgame best in slot</h2><p class="muted" style="margin:-6px 0 14px">The strongest pieces in the game files, mostly at top gear score. A long-term goal, not what you need to start.</p><div class="doll">';
