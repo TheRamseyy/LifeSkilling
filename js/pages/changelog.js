@@ -18,5 +18,7 @@ App.page("data/changelog",{title:"Changelog",render:function(root){
     ["27 Nov 2026",["Calculator redesign: collapsible breakdown tree, skills grouped by tradeskill, stations grouped by type.","Pick which item to use for \"any X\" materials; the choice flows into totals and gathering."]],
     ["Earlier",["First calculator: raw materials, crafting steps, requirements, optional prices."]]
   ];
-  root.innerHTML='<div class="prose"><h1>Changelog</h1>'+log.map(function(e){return '<h2>'+App.esc(e[0])+'</h2><ul>'+e[1].map(function(t){return '<li>'+App.esc(t)+'</li>'}).join("")+'</ul>'}).join("")+'</div>';
+  // one heading per day: merge entries that share a date, newest first as listed
+  var days=[];log.forEach(function(e){var d=days[days.length-1];if(d&&d[0]===e[0])d[1]=d[1].concat(e[1]);else days.push([e[0],e[1].slice()])});
+  root.innerHTML='<div class="prose"><h1>Changelog</h1>'+days.map(function(e){return '<h2>'+App.esc(e[0])+'</h2><ul>'+e[1].map(function(t){return '<li>'+App.esc(t)+'</li>'}).join("")+'</ul>'}).join("")+'</div>';
 }});
